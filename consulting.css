@@ -1,0 +1,469 @@
+/* ---------- Project Info Styling ---------- */
+.project-info {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.project-info input[type="text"] {
+  padding: 8px;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+  font-size: 1em;
+}
+
+.display-details {
+  background: #e6f2ff;
+  border-radius: 8px;
+  padding: 10px 15px;
+  margin-bottom: 15px;
+  font-size: 0.95em;
+  color: #003366;
+}
+
+.display-details strong {
+  color: #000;
+}
+
+/* Ensure project info prints */
+@media print {
+  .display-details {
+    display: block !important;
+    margin-bottom: 10px;
+    border: 1px solid #000;
+    color: #000;
+    background: #fff;
+  }
+}
+
+body {
+  font-family: Arial, sans-serif;
+  background: #f5f9ff;
+  color: #222;
+  margin: 0;
+  padding: 0;
+}
+
+.container {
+  max-width: 1000px;
+  margin: 30px auto;
+  padding: 20px;
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+h1,
+h2 {
+  text-align: center;
+  margin: 0;
+}
+
+h1 {
+  color: #004a99;
+}
+
+h2 {
+  font-size: 1rem;
+  color: #555;
+  margin-bottom: 20px;
+}
+
+.input-section {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+input[type="date"],
+input[type="text"],
+select {
+  padding: 8px;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+  font-size: 1em;
+}
+
+/* ✅ Unified button row layout */
+.button-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+button {
+  background-color: #007bff;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 10px 14px;
+  cursor: pointer;
+  transition: 0.3s;
+  font-size: 0.95em;
+}
+
+button.secondary {
+  background-color: #28a745;
+}
+
+button:hover {
+  opacity: 0.9;
+}
+
+#loadHolidaysFile {
+  padding: 6px;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  background: #f8f8f8;
+  font-size: 0.9em;
+}
+
+/* Table styles */
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 10px;
+  font-size: 0.95em;
+}
+
+th,
+td {
+  border: 1px solid #ddd;
+  padding: 8px;
+  text-align: center;
+}
+
+th {
+  background-color: #004a99;
+  color: white;
+}
+
+tfoot {
+  background: #e6f2ff;
+  font-weight: bold;
+}
+
+#holidayList ul {
+  list-style-type: none;
+  padding: 0;
+}
+
+#holidayList li {
+  background: #e6f2ff;
+  border-radius: 6px;
+  margin: 4px 0;
+  padding: 5px 10px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+#holidayList button {
+  background-color: #dc3545;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 0.8em;
+}
+
+#holidayList h4 {
+  margin-bottom: 5px;
+}
+
+/* Rule Violation Styling */
+.violates-rule {
+  background-color: #fff6e6 !important;
+  border-left: 4px solid #ff8c00;
+}
+
+.rule-warning {
+  margin-top: 4px;
+  font-size: 0.8em;
+  color: #8a4b00;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.rule-warning .restore-btn {
+  background-color: #ffc107;
+  color: #000;
+  border: none;
+  border-radius: 6px;
+  padding: 4px 10px;
+  margin-top: 4px;
+  cursor: pointer;
+  font-size: 0.8em;
+}
+
+.rule-warning .restore-btn:hover {
+  background-color: #e0a800;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .container {
+    width: 95%;
+    padding: 10px;
+  }
+  h1 {
+    font-size: 1.5em;
+  }
+  h2 {
+    font-size: 0.9em;
+  }
+  .button-row {
+    flex-direction: column;
+  }
+  table,
+  th,
+  td {
+    font-size: 0.85em;
+  }
+}
+
+/* Print */
+@media print {
+  body {
+    background: white;
+  }
+  .input-section,
+  .button-row {
+    display: none;
+  }
+  table {
+    border: 1px solid #000;
+    font-size: 0.9em;
+  }
+  th {
+    background-color: #ccc !important;
+    color: #000 !important;
+  }
+}
+
+/* ---------- Adjustable Table Styling ---------- */
+.table-container {
+  width: 100%;
+  overflow-x: auto; /* allows horizontal scrolling if needed */
+  margin-top: 10px;
+}
+
+#scheduleTable {
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: fixed; /* allows column resizing */
+  resize: both;
+  overflow: auto;
+}
+
+#scheduleTable th,
+#scheduleTable td {
+  border: 1px solid #ddd;
+  padding: 8px;
+  text-align: center;
+  resize: horizontal; /* allow individual column resizing */
+  overflow: hidden;
+}
+
+/* Cursor feedback for resize */
+#scheduleTable th {
+  background-color: #004a99;
+  color: white;
+  cursor: col-resize;
+  position: relative;
+}
+
+/* Keep responsiveness */
+@media (max-width: 768px) {
+  .table-container {
+    overflow-x: scroll;
+  }
+}
+
+@media print {
+  @page {
+    size: A4;
+    margin: 1cm;
+  }
+
+  body {
+    width: 210mm;
+    height: 297mm;
+    overflow: hidden;
+  }
+
+  .container {
+    box-shadow: none;
+    border: none;
+    width: 100%;
+    padding: 0;
+  }
+
+  .input-section,
+  .button-row,
+  #holidayList {
+    display: none !important;
+  }
+
+  table {
+    font-size: 9pt;
+  }
+}
+
+/* ---------- Project Info Styling ---------- */
+.project-info {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.project-info input[type="text"] {
+  padding: 8px;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+  font-size: 1em;
+}
+
+.display-details {
+  background: #e6f2ff;
+  border-radius: 8px;
+  padding: 10px 15px;
+  margin-bottom: 15px;
+  font-size: 0.95em;
+  color: #003366;
+}
+
+.display-details strong {
+  color: #000;
+}
+
+/* ---------- Print Settings ---------- */
+@media print {
+  body {
+    background: white;
+  }
+
+  /* Hide everything outside printArea */
+  body * {
+    visibility: hidden;
+  }
+
+  #printArea,
+  #printArea * {
+    visibility: visible;
+  }
+
+  #printArea {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+  }
+
+  /* Clean print style */
+  .button-row,
+  .input-section,
+  .project-info {
+    display: none !important;
+  }
+
+  table {
+    border: 1px solid #000;
+    font-size: 0.9em;
+  }
+
+  th {
+    background-color: #ccc !important;
+    color: #000 !important;
+  }
+
+  .display-details {
+    display: block !important;
+    border: 1px solid #000;
+    color: #000;
+    background: #fff;
+  }
+}
+
+/* ---------- Project Info Styling ---------- */
+.project-info {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.project-info input[type="text"] {
+  padding: 8px;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+  font-size: 1em;
+}
+
+.display-details {
+  background: #e6f2ff;
+  border-radius: 8px;
+  padding: 10px 15px;
+  margin-bottom: 15px;
+  font-size: 0.95em;
+  color: #003366;
+}
+
+.display-details strong {
+  color: #000;
+}
+
+/* ---------- Print Settings ---------- */
+@media print {
+  body {
+    background: white;
+  }
+
+  /* Hide everything outside printArea */
+  body * {
+    visibility: hidden;
+  }
+
+  #printArea,
+  #printArea * {
+    visibility: visible;
+  }
+
+  #printArea {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+  }
+
+  /* Hide unnecessary elements */
+  .button-row,
+  .input-section,
+  .project-info {
+    display: none !important;
+  }
+
+  /* Keep and style project details */
+  .display-details {
+    display: block !important;
+    border: 1px solid #000;
+    background: #fff;
+    color: #000;
+    margin-bottom: 15px;
+  }
+
+  table {
+    border: 1px solid #000;
+    font-size: 0.9em;
+  }
+
+  th {
+    background-color: #ccc !important;
+    color: #000 !important;
+  }
+}
