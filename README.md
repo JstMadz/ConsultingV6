@@ -1,36 +1,157 @@
-# Consulting Services Procurement Scheduler
+<div align="center">
+
+# 📅 Consulting Services Procurement Scheduler
+
 ### Based on the 2016 Revised IRR of Republic Act No. 9184 (Annex "C")
 
-A web-based procurement scheduling application developed to assist Procurement Management Offices (PMOs), BAC Secretariats, faculty researchers, and government agencies in generating compliant procurement timelines for **Consulting Services**. The application automatically computes procurement schedules while considering government procurement rules, weekends, holidays, and user-defined adjustments.
+A web-based procurement scheduling system for **Consulting Services** that automatically generates compliant procurement timelines while considering weekends, holidays, and procurement regulations.
 
 ---
 
-## Features
+![HTML5](https://img.shields.io/badge/HTML5-E34F26?style=for-the-badge&logo=html5&logoColor=white)
+![CSS3](https://img.shields.io/badge/CSS3-1572B6?style=for-the-badge&logo=css3&logoColor=white)
+![JavaScript](https://img.shields.io/badge/JavaScript-F7DF1E?style=for-the-badge&logo=javascript&logoColor=black)
+![Responsive](https://img.shields.io/badge/Responsive-Yes-success?style=for-the-badge)
+![Version](https://img.shields.io/badge/Version-1.0-blue?style=for-the-badge)
+![Status](https://img.shields.io/badge/Status-Active-success?style=for-the-badge)
 
-### Procurement Schedule Generation
-- Generates the procurement timeline based on the selected starting activity and start date.
-- Supports the following starting activities:
-  - Pre-Procurement Conference
-  - Advertisement/Posting of Request for Expression of Interest
-  - Eligibility Check and Shortlisting
-
-### Automatic Date Computation
-- Calculates succeeding procurement activities automatically.
-- Excludes:
-  - Saturdays
-  - Sundays
-  - User-defined Holidays
-
-### Government Procurement Compliance
-Implements the mandatory scheduling requirements under the 2016 Revised IRR of RA 9184 (Annex "C"), including:
-
-- Pre-Bid Conference shall be scheduled at least **7 Calendar Days** after Eligibility Check and Shortlisting.
-- Deadline for Submission and Opening of Bids shall be scheduled at least **12 Calendar Days** after the Pre-Bid Conference.
-- Automatically adjusts dates that fall on weekends or declared holidays.
+</div>
 
 ---
 
-## Procurement Activities Included
+# Table of Contents
+
+- [Overview](#overview)
+- [Features](#features)
+- [Procurement Activities](#procurement-activities)
+- [System Workflow](#system-workflow)
+- [Screenshots](#screenshots)
+- [Installation](#installation)
+- [How to Use](#how-to-use)
+- [Project Structure](#project-structure)
+- [Technology Stack](#technology-stack)
+- [Future Improvements](#future-improvements)
+- [Acknowledgements](#acknowledgements)
+- [License](#license)
+
+---
+
+# Overview
+
+The **Consulting Services Procurement Scheduler** is a browser-based application designed to assist Procurement Management Offices (PMOs), Bids and Awards Committees (BACs), faculty researchers, and government agencies in preparing procurement schedules that comply with the **2016 Revised Implementing Rules and Regulations (IRR) of Republic Act No. 9184, Annex "C"**.
+
+The system automates procurement scheduling, minimizes manual computation errors, skips weekends and holidays, validates mandatory procurement timelines, and generates professional printable reports.
+
+---
+
+# Features
+
+## 📅 Procurement Schedule Generation
+
+- Automatic procurement timeline generation
+- Multiple starting activity options
+- Working-day computation
+- Automatic schedule recalculation
+
+---
+
+## ⚖ Government Procurement Compliance
+
+Implements scheduling rules including:
+
+- Minimum procurement durations
+- Maximum allowable durations
+- Seven-calendar-day rule for Pre-Bid Conference
+- Twelve-calendar-day rule before Bid Submission
+- Automatic working-day adjustment
+
+---
+
+## 📆 Holiday Management
+
+- Add Holidays
+- Remove Holidays
+- Save Holidays (.json)
+- Load Holidays (.json)
+- Local Storage support
+
+---
+
+## 🔄 Dynamic Schedule Adjustment
+
+Users may add additional working days for every procurement activity.
+
+Whenever adjustments are made, the application automatically:
+
+- Updates succeeding schedules
+- Updates total calendar days
+- Checks procurement compliance
+- Highlights rule violations
+
+---
+
+## 🚨 Rule Validation
+
+The system automatically detects violations.
+
+Features include:
+
+- Warning messages
+- Highlighted rows
+- Restore Default Schedule button
+
+---
+
+## 📁 Project Information
+
+The application stores:
+
+- Project Title
+- Approved Budget for the Contract (ABC)
+
+Features:
+
+- Auto-save using Local Storage
+- Auto-load upon reopening
+- Included in printed reports
+- Included in PDF exports
+
+---
+
+## 🖨 Print / Export to PDF
+
+The printable report includes:
+
+- University Header
+- Application Title
+- Project Title
+- Approved Budget for the Contract (ABC)
+- Procurement Schedule
+- Total Calendar Days
+
+Supports:
+
+- Colored tables
+- Colored headers
+- Rule highlighting
+- Professional report layout
+
+---
+
+## 📱 Responsive Design
+
+Compatible with:
+
+- Desktop
+- Laptop
+- Tablet
+- Mobile Devices
+
+---
+
+# Procurement Activities
+
+The scheduler currently supports:
 
 1. Pre-Procurement Conference
 2. Advertisement / Posting of Request for Expression of Interest
@@ -49,140 +170,69 @@ Implements the mandatory scheduling requirements under the 2016 Revised IRR of R
 
 ---
 
-## Dynamic Schedule Adjustment
+# System Workflow
 
-Each procurement activity includes:
-
-- Minimum allowable working days
-- Maximum allowable working days
-- User-adjustable additional working days
-
-Whenever adjustments are made, the system automatically:
-
-- Recalculates all succeeding schedules
-- Updates total calendar days
-- Validates procurement rules
-- Highlights rule violations
-
----
-
-## Rule Validation
-
-The system continuously validates the generated schedule.
-
-If a procurement rule is violated:
-
-- The affected row is highlighted.
-- A warning message is displayed.
-- A **Restore** button is provided to restore the default compliant schedule.
-
----
-
-## Holiday Management
-
-The application supports custom holidays.
-
-Users may:
-
-- Add holidays
-- Delete holidays
-- Save holidays to a JSON file
-- Load holidays from a JSON file
-
-Holiday data is automatically stored using Local Storage for future sessions.
+```text
+Input Project Information
+          │
+          ▼
+Select Starting Activity
+          │
+          ▼
+Choose Start Date
+          │
+          ▼
+Add Holidays (Optional)
+          │
+          ▼
+Generate Schedule
+          │
+          ▼
+Adjust Working Days
+          │
+          ▼
+Rule Validation
+          │
+          ▼
+Print / Export PDF
+```
 
 ---
 
-## Project Information
+# Screenshots
 
-The application allows users to enter:
+Add screenshots inside the **images** folder.
 
-- Project Title
-- Approved Budget for the Contract (ABC)
-
-Features include:
-
-- Automatic Local Storage
-- Automatic loading when reopening the application
-- Included in printed reports
-- Included in PDF exports
-
----
-
-## Print and PDF Export
-
-The application includes a print-friendly layout.
-
-When printing or exporting to PDF, the report contains:
-
-- University Header
-- Application Title
-- Project Title
-- Approved Budget for the Contract (ABC)
-- Complete Procurement Schedule
-- Total Calendar Days
-
-The printed report preserves:
-
-- Table colors
-- Header colors
-- Rule violation highlighting
-- Professional formatting
-
----
-
-## Responsive Design
-
-The interface is optimized for:
-
-- Desktop Computers
-- Laptops
-- Tablets
-- Mobile Devices
-
----
-
-## Technologies Used
-
-- HTML5
-- CSS3
-- JavaScript (Vanilla JavaScript)
-- Local Storage API
-
-No external libraries or frameworks are required.
-
----
-
-## Folder Structure
+Example:
 
 ```
-project-folder/
+images/
 │
-├── consulting.html
-├── consulting.css
-├── consulting.js
-├── README.md
-└── holidays.json (optional)
+├── home.png
+├── generated-schedule.png
+├── holiday-management.png
+└── print-preview.png
+```
+
+Then display them:
+
+```markdown
+## Home Page
+
+![Home](images/home.png)
+
+## Generated Schedule
+
+![Schedule](images/generated-schedule.png)
+
+## Print Preview
+
+![Print](images/print-preview.png)
 ```
 
 ---
 
-## Browser Compatibility
-
-Tested on:
-
-- Google Chrome
-- Microsoft Edge
-- Mozilla Firefox
-
-Recommended Browser:
-- Google Chrome (latest version)
-
----
-
-## How to Use
-
-### 1. Download the Project
+# Installation
 
 Clone the repository.
 
@@ -190,28 +240,20 @@ Clone the repository.
 git clone https://github.com/yourusername/consulting-procurement-scheduler.git
 ```
 
-or download the ZIP file.
-
----
-
-### 2. Open the Application
-
-Open
+Open the project folder.
 
 ```
 consulting.html
 ```
 
-using your preferred web browser.
-
-For development, it is recommended to use:
+Recommended:
 
 - Visual Studio Code
 - Live Server Extension
 
 ---
 
-### 3. Generate a Schedule
+# How to Use
 
 1. Enter the Project Title.
 2. Enter the Approved Budget for the Contract (ABC).
@@ -219,66 +261,92 @@ For development, it is recommended to use:
 4. Select the Start Date.
 5. Add holidays if necessary.
 6. Click **Generate Schedule**.
+7. Adjust working days if needed.
+8. Print or Export to PDF.
 
 ---
 
-### 4. Adjust the Schedule
-
-Modify the **Adjust (+ Days)** column whenever additional working days are required.
-
-The application automatically recalculates all succeeding activities.
-
----
-
-### 5. Print or Export to PDF
-
-Click
+# Project Structure
 
 ```
-Print / Export PDF
+Consulting-Procurement-Scheduler
+│
+├── consulting.html
+├── consulting.css
+├── consulting.js
+├── README.md
+├── LICENSE
+│
+└── images
+    ├── home.png
+    ├── schedule.png
+    └── print-preview.png
 ```
-
-to generate a printable procurement schedule.
-
-For best results, enable:
-
-> Print Background Graphics
-
-in your browser's print settings.
 
 ---
 
-## Future Enhancements
+# Technology Stack
 
-Possible future improvements include:
+- HTML5
+- CSS3
+- JavaScript (Vanilla)
+- Local Storage API
+
+No external libraries required.
+
+---
+
+# Future Improvements
 
 - Support for Republic Act No. 12009 (New Government Procurement Act)
 - Goods Procurement Scheduler
 - Infrastructure Procurement Scheduler
 - Non-Consulting Services Scheduler
-- Automatic Gantt Chart Generation
+- Automatic Gantt Chart
 - Excel Export
-- PDF Report Generation without Browser Print Dialog
-- Electronic Signature Section
+- Native PDF Generation
 - Agency Logo Upload
 - BAC Resolution Number
-- Project Identification Number
+- Project ID
+- Dashboard Analytics
+- Procurement Monitoring
 - Calendar View
-- Procurement Monitoring Dashboard
+- Dark Mode
 
 ---
 
-## License
+# Acknowledgements
 
-This project is intended for educational, research, and government procurement planning purposes.
+This project was inspired by the procurement procedures prescribed under:
 
-Users are encouraged to verify generated schedules against the latest Government Procurement Policy Board (GPPB) issuances and applicable procurement laws before official use.
+- Republic Act No. 9184
+- 2016 Revised IRR of RA 9184
+- Government Procurement Policy Board (GPPB)
+- Technological University of the Philippines – Manila
 
 ---
 
-## Author
+# License
 
-Developed for academic research and government procurement scheduling.
+This project is released for **educational**, **research**, and **government planning** purposes.
 
-**Consulting Services Procurement Scheduler**
-Based on the 2016 Revised IRR of Republic Act No. 9184 (Annex "C").
+Users should always verify generated schedules against the latest Government Procurement Policy Board (GPPB) issuances and applicable procurement laws before official implementation.
+
+---
+
+<div align="center">
+
+## Developed By
+
+**Madz Amador**
+
+Master in Information Technology  
+Doctor of Technology Management (Candidate)
+
+Technological University of the Philippines – Manila
+
+---
+
+⭐ If you found this project useful, consider giving it a star on GitHub!
+
+</div>
