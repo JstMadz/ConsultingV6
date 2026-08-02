@@ -1,0 +1,175 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <meta name="theme-color" content="#8b1538" />
+    <title>Consulting Services Procurement Scheduler | TUP Manila</title>
+    <link rel="icon" type="image/png" href="tup_logo.png" />
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body class="scheduler-page">
+    <main class="app-shell">
+      <section class="app-card" aria-labelledby="pageTitle">
+        <header class="app-header">
+          <img
+            class="screen-logo"
+            src="tup_logo.png"
+            alt="Technological University of the Philippines logo"
+          />
+          <div>
+            <p class="eyebrow">
+              Technological University of the Philippines – Manila
+            </p>
+            <h1 id="pageTitle">Consulting Services Procurement Scheduler</h1>
+            <p class="subtitle">2016 Revised IRR of RA 9184 · Annex “C”</p>
+            <a class="landing-link" href="index.html">← All procurement schedulers</a>
+          </div>
+        </header>
+        <div
+          id="formStatus"
+          class="form-status"
+          role="status"
+          aria-live="polite"
+        ></div>
+        <form id="schedulerForm" novalidate>
+          <fieldset>
+            <legend>Project information</legend>
+            <div class="form-grid project-grid">
+              <div class="field">
+                <label for="projectTitle">Project title *</label
+                ><input
+                  id="projectTitle"
+                  type="text"
+                  maxlength="180"
+                  placeholder="e.g., Feasibility Study for Campus Development"
+                  required
+                />
+                <p id="projectTitleError" class="field-error"></p>
+              </div>
+              <div class="field">
+                <label for="projectBudget"
+                  >Approved Budget for the Contract (ABC) *</label
+                >
+                <div class="currency-input">
+                  <span>₱</span
+                  ><input
+                    id="projectBudget"
+                    type="text"
+                    inputmode="decimal"
+                    placeholder="1,000,000.00"
+                    required
+                  />
+                </div>
+                <p class="field-hint">
+                  Enter a value from ₱0.00 to ₱999,999,999,999.99.
+                </p>
+                <p id="projectBudgetError" class="field-error"></p>
+              </div>
+            </div>
+          </fieldset>
+          <fieldset>
+            <legend>Schedule setup</legend>
+            <div class="form-grid">
+              <div class="field">
+                <label for="startActivity">Starting activity *</label
+                ><select id="startActivity" required></select>
+                <p class="field-hint">
+                  Activities before this point are excluded.
+                </p>
+              </div>
+              <div class="field">
+                <label for="startDate">Start date *</label
+                ><input id="startDate" type="date" required />
+                <p id="startDateError" class="field-error"></p>
+              </div>
+              <div class="field">
+                <label for="startTime"
+                  >Start time <span class="optional">(optional)</span></label
+                ><input id="startTime" type="time" />
+              </div>
+              <div class="field">
+                <label for="endTime"
+                  >End time <span class="optional">(optional)</span></label
+                ><input id="endTime" type="time" />
+                <p id="endTimeError" class="field-error"></p>
+              </div>
+            </div>
+          </fieldset>
+          <fieldset>
+            <legend>Non-working dates</legend>
+            <div class="holiday-controls">
+              <div class="field">
+                <label for="holidayPicker"
+                  >Add a holiday or office closure</label
+                ><input id="holidayPicker" type="date" />
+                <p id="holidayPickerError" class="field-error"></p>
+              </div>
+              <button
+                id="addHolidayBtn"
+                class="button button-outline"
+                type="button"
+              >
+                Add date
+              </button>
+            </div>
+            <div id="holidayList" class="holiday-list" aria-live="polite"></div>
+            <div class="file-actions">
+              <button
+                id="saveHolidaysBtn"
+                class="button button-quiet"
+                type="button"
+              >
+                Download holiday list</button
+              ><label class="file-label"
+                >Choose holiday list
+                <input
+                  id="loadHolidaysFile"
+                  type="file"
+                  accept="application/json,.json" /></label
+              ><button
+                id="loadHolidaysBtn"
+                class="button button-quiet"
+                type="button"
+              >
+                Load selected list
+              </button>
+            </div>
+          </fieldset>
+          <div class="button-row">
+            <button
+              id="generateBtn"
+              class="button button-primary"
+              type="submit"
+            >
+              Add project schedule</button
+            ><button
+              id="printBtn"
+              class="button button-secondary"
+              type="button"
+              disabled
+            >
+              Print or save as PDF
+            </button>
+          </div>
+        </form>
+        <section
+          id="projectSchedules"
+          class="project-schedules"
+          hidden
+          aria-labelledby="projectSchedulesHeading"
+        >
+          <div class="schedule-heading">
+            <div>
+              <p class="eyebrow">Generated procurement timelines</p>
+              <h2 id="projectSchedulesHeading">Project schedules</h2>
+            </div>
+            <p id="projectCount" class="generated-at"></p>
+          </div>
+          <div id="scheduleList"></div>
+        </section>
+      </section>
+    </main>
+    <script src="script.js"></script>
+  </body>
+</html>

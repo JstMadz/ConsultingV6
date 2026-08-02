@@ -1,457 +1,323 @@
-// consulting.js - Full file (original logic preserved + requested improvements)
-// ---------------------------------------------------------------
-// Event listeners (generate, print, holidays, save/load)
-// ---------------------------------------------------------------
-document.getElementById("generateBtn").addEventListener("click", generateSchedule);
-// ✅ Updated: now call handlePrint to include date/time & formatted ABC in print
-document.getElementById("printBtn").addEventListener("click", handlePrint);
-document.getElementById("addHolidayBtn").addEventListener("click", addHoliday);
-document.getElementById("saveHolidaysBtn").addEventListener("click", saveHolidaysToFile);
-document.getElementById("loadHolidaysBtn").addEventListener("click", loadHolidaysFromFile);
-
-const consultingActivities = [
-  { name: "Pre-Procurement Conference", min: 1, max: 1 },
-  {
-    name: "Advertisement/Posting of Request for Expression of Interest",
-    min: 7,
-    max: 7,
+const activities = [
+  ["Pre-Procurement Conference", 1, 1],
+  ["Advertisement/Posting of Request for Expression of Interest", 7, 7],
+  ["Eligibility Check and Shortlisting", 1, 20],
+  ["Pre-Bid Conference", 1, 12],
+  ["Deadline of Submission and Opening of Bids", 1, 75],
+  ["Bid Evaluation", 1, 21],
+  ["Approval of Ranking by the HOPE", 1, 2],
+  ["Notification for Negotiation", 1, 3],
+  ["Negotiation", 1, 10],
+  ["Post-Qualification", 2, 30],
+  ["Approval of Resolution/Issuance of Notice of Award", 1, 15],
+  ["Contract Preparation and Signing", 1, 10],
+  ["Approval of Contract by Higher Authority", 1, 30],
+  ["Issuance of Notice to Proceed", 1, 7],
+].map(([name, min, max]) => ({ name, min, max }));
+const $ = (id) => document.getElementById(id);
+let holidays = [],
+  projects = [];
+const localDate = (v) => {
+    const [y, m, d] = v.split("-").map(Number);
+    return new Date(y, m - 1, d);
   },
-  { name: "Eligibility Check and Shortlisting", min: 1, max: 20 },
-  { name: "Pre-Bid Conference", min: 1, max: 12 },
-  { name: "Deadline of Submission and Opening of Bids", min: 1, max: 75 },
-  { name: "Bid Evaluation", min: 1, max: 21 },
-  { name: "Approval of Ranking by the HOPE", min: 1, max: 2 },
-  { name: "Notification for Negotiation", min: 1, max: 3 },
-  { name: "Negotiation", min: 1, max: 10 },
-  { name: "Post-Qualification", min: 2, max: 30 },
-  {
-    name: "Approval of Resolution/Issuance of Notice of Award",
-    min: 1,
-    max: 15,
+  isoDate = (d) =>
+    `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`,
+  validDate = (v) =>
+    /^\d{4}-\d{2}-\d{2}$/.test(v) && isoDate(localDate(v)) === v,
+  formatDate = (d) =>
+    new Intl.DateTimeFormat("en-PH", {
+      weekday: "short",
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+    }).format(d),
+  formatDateTime = (d = new Date()) =>
+    new Intl.DateTimeFormat("en-PH", {
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+      hour: "numeric",
+      minute: "2-digit",
+      hour12: true,
+    }).format(d),
+  formatTime = (t) => {
+    if (!t) return "Not specified";
+    const [h, m] = t.split(":").map(Number);
+    return `${h % 12 || 12}:${String(m).padStart(2, "0")} ${h >= 12 ? "PM" : "AM"}`;
   },
-  { name: "Contract Preparation and Signing", min: 1, max: 10 },
-  { name: "Approval of Contract by Higher Authority", min: 1, max: 30 },
-  { name: "Issuance of Notice to Proceed", min: 1, max: 7 },
-];
-
-let holidays = [];
-
-// ---------------- HOLIDAY MANAGEMENT ----------------
-function updateHolidayList() {
-  const div = document.getElementById("holidayList");
-  div.innerHTML = "<h4>Current Holidays:</h4>";
-  if (!holidays.length) {
-    div.innerHTML += "<p><i>No holidays added.</i></p>";
-    return;
-  }
-
-  const ul = document.createElement("ul");
-  holidays.forEach((h, i) => {
-    const li = document.createElement("li");
-    li.textContent = formatDate(new Date(h));
-    const btn = document.createElement("button");
-    btn.textContent = "❌";
-    btn.onclick = () => {
-      holidays.splice(i, 1);
-      localStorage.setItem("consultingHolidays", JSON.stringify(holidays));
-      updateHolidayList();
-    };
-    li.appendChild(btn);
-    ul.appendChild(li);
-  });
-  div.appendChild(ul);
-}
-
-function addHoliday() {
-  const date = document.getElementById("holidayPicker").value;
-  if (!date) return alert("Select a date first.");
-  const d = new Date(date).toDateString();
-  if (!holidays.includes(d)) {
-    holidays.push(d);
-    holidays.sort((a, b) => new Date(a) - new Date(b));
-    localStorage.setItem("consultingHolidays", JSON.stringify(holidays));
-    updateHolidayList();
-  } else alert("Already added.");
-}
-
-function saveHolidaysToFile() {
-  const blob = new Blob([JSON.stringify(holidays, null, 2)], {
-    type: "application/json",
-  });
-  const link = document.createElement("a");
-  link.href = URL.createObjectURL(blob);
-  link.download = "holidays.json";
-  link.click();
-}
-
-function loadHolidaysFromFile() {
-  const file = document.getElementById("loadHolidaysFile").files[0];
-  if (!file) return alert("Select a file first.");
-  const reader = new FileReader();
-  reader.onload = (e) => {
-    try {
-      const arr = JSON.parse(e.target.result);
-      if (!Array.isArray(arr)) throw "Invalid file.";
-      holidays = arr;
-      localStorage.setItem("consultingHolidays", JSON.stringify(holidays));
-      updateHolidayList();
-      alert("Holidays loaded.");
-    } catch (err) {
-      alert("Error: " + err);
-    }
+  peso = (v) =>
+    new Intl.NumberFormat("en-PH", {
+      style: "currency",
+      currency: "PHP",
+      minimumFractionDigits: 2,
+    }).format(v),
+  money = (v) => {
+    const n = String(v).replace(/[₱,\s]/g, "");
+    if (!/^\d+(\.\d{1,2})?$/.test(n)) return null;
+    const a = Number(n);
+    return Number.isFinite(a) && a >= 0 && a <= 999999999999.99 ? a : null;
+  },
+  escape = (v) => {
+    const e = document.createElement("div");
+    e.textContent = v;
+    return e.innerHTML;
   };
-  reader.readAsText(file);
+function status(msg, error = false) {
+  $("formStatus").textContent = msg;
+  $("formStatus").classList.toggle("is-error", error);
 }
-
-// ---------------- DATE UTILITIES ----------------
-function isHolidayOrWeekend(d) {
-  const day = d.getDay();
-  return day === 0 || day === 6 || holidays.includes(d.toDateString());
+function fieldError(id, msg) {
+  $(id).setAttribute("aria-invalid", !!msg);
+  $(id + "Error").textContent = msg || "";
 }
-function nextWorkingDay(d) {
-  const x = new Date(d);
-  while (isHolidayOrWeekend(x)) x.setDate(x.getDate() + 1);
-  return x;
+function nonWorking(d) {
+  return d.getDay() === 0 || d.getDay() === 6 || holidays.includes(isoDate(d));
 }
-function addWorkingDays(d, n) {
-  let r = new Date(d);
-  let added = 0;
-  while (added < n) {
+function nextWorking(d) {
+  const r = new Date(d);
+  while (nonWorking(r)) r.setDate(r.getDate() + 1);
+  return r;
+}
+function addWorking(d, n) {
+  const r = new Date(d);
+  for (let a = 0; a < n; ) {
     r.setDate(r.getDate() + 1);
-    if (!isHolidayOrWeekend(r)) added++;
+    if (!nonWorking(r)) a++;
   }
   return r;
 }
-function addCalendarDays(d, n) {
-  const x = new Date(d);
-  x.setDate(x.getDate() + n);
-  return x;
+function addCalendar(d, n) {
+  const r = new Date(d);
+  r.setDate(r.getDate() + n);
+  return r;
 }
-function daysBetween(a, b) {
-  return Math.round((b - a) / (1000 * 60 * 60 * 24));
+function between(a, b) {
+  return Math.round((b - a) / 86400000);
 }
-function formatDate(d) {
-  return d.toLocaleDateString("en-US", {
-    weekday: "short",
-    year: "numeric",
-    month: "long",
-    day: "numeric",
-  });
+function persist() {
+  localStorage.setItem("consultingProjects", JSON.stringify(projects));
+  localStorage.setItem("consultingHolidays", JSON.stringify(holidays));
 }
-
-// ---------------- HELPERS (Added) ----------------
-
-// ✅ Added: Format time (from input type="time" value "HH:MM") to 12-hour format with AM/PM
-function formatTime12Hour(timeStr) {
-  if (!timeStr) return "";
-  const parts = timeStr.split(":");
-  if (parts.length < 2) return "";
-  let h = parseInt(parts[0], 10);
-  const m = parts[1];
-  const ampm = h >= 12 ? "PM" : "AM";
-  h = h % 12 || 12;
-  return `${h}:${m} ${ampm}`;
-}
-
-// ✅ Added: Format Philippine Peso (for display & printing)
-// Accepts user input like "1000000" or "₱1,000,000.00" and returns "₱1,000,000.00"
-function formatPeso(input) {
-  if (input === null || input === undefined) return "";
-  const raw = String(input).trim();
-  if (raw === "") return "";
-  // Remove any character except digits, minus sign, decimal point
-  const cleaned = raw.replace(/[^\d.-]/g, "");
-  const num = parseFloat(cleaned);
-  if (isNaN(num)) return raw; // if it can't parse, show as-is
-  return num.toLocaleString("en-PH", {
-    style: "currency",
-    currency: "PHP",
-    minimumFractionDigits: 2,
-  });
-}
-
-// ---------------- PROJECT INFO HANDLING ----------------
-
-// Single authoritative displayProjectInfo (replaces earlier duplicates in original file)
-// ✅ Modified so ABC is displayed formatted but stored raw in localStorage, and time is saved too.
-function displayProjectInfo() {
-  const title = document.getElementById("projectTitle").value.trim();
-  const budgetRaw = document.getElementById("projectBudget").value.trim();
-  const div = document.getElementById("displayProjectDetails");
-  const time = document.getElementById("startTime") ? document.getElementById("startTime").value : "";
-
-  if (!title && !budgetRaw && !time) {
-    div.innerHTML = "";
-    return;
-  }
-
-  const budgetDisplay = budgetRaw ? formatPeso(budgetRaw) : "<i>Not specified</i>";
-  const timeDisplay = time ? formatTime12Hour(time) : "";
-
-  div.innerHTML = `
-      <p><strong>Project Title:</strong> ${title || "<i>Not specified</i>"}</p>
-      <p><strong>Approved Budget for the Contract (ABC):</strong> ${budgetDisplay}</p>
-      ${timeDisplay ? `<p><strong>Activity Time:</strong> ${timeDisplay}</p>` : ""}
-    `;
-
-  // Save raw budget and time to localStorage so user can edit later easily
-  localStorage.setItem(
-    "consultingProjectInfo",
-    JSON.stringify({ title, budget: budgetRaw, time })
+function validate() {
+  const title = $("projectTitle").value.trim(),
+    budget = money($("projectBudget").value),
+    date = $("startDate").value,
+    start = $("startTime").value,
+    end = $("endTime").value;
+  fieldError("projectTitle", title ? "" : "Enter the project title.");
+  fieldError(
+    "projectBudget",
+    budget === null
+      ? "Enter a valid non-negative peso amount using up to two decimal places."
+      : "",
+  );
+  fieldError("startDate", validDate(date) ? "" : "Choose a valid start date.");
+  fieldError(
+    "endTime",
+    start && end && end <= start
+      ? "End time must be later than start time."
+      : "",
+  );
+  return !!(
+    title &&
+    budget !== null &&
+    validDate(date) &&
+    (!start || !end || end > start)
   );
 }
-
-// ---------------- AUTO-LOAD PROJECT INFO ----------------
-window.addEventListener("load", () => {
-  const savedInfo = localStorage.getItem("consultingProjectInfo");
-  if (savedInfo) {
-    try {
-      const { title, budget, time } = JSON.parse(savedInfo);
-      if (document.getElementById("projectTitle")) document.getElementById("projectTitle").value = title || "";
-      if (document.getElementById("projectBudget")) document.getElementById("projectBudget").value = budget || "";
-      if (document.getElementById("startTime")) document.getElementById("startTime").value = time || "";
-      displayProjectInfo();
-    } catch (e) {
-      // ignore parse errors
-    }
-  }
-
-  const saved = localStorage.getItem("consultingHolidays");
-  if (saved) holidays = JSON.parse(saved);
-  updateHolidayList();
-
-  // -------- Enable Column Resizing (original code kept) --------
-  function makeTableResizable(table) {
-    const cols = table.querySelectorAll("th");
-    cols.forEach((th) => {
-      const resizer = document.createElement("div");
-      resizer.style.width = "5px";
-      resizer.style.height = "100%";
-      resizer.style.position = "absolute";
-      resizer.style.top = 0;
-      resizer.style.right = 0;
-      resizer.style.cursor = "col-resize";
-      resizer.style.userSelect = "none";
-      th.style.position = "relative";
-      th.appendChild(resizer);
-
-      let startX, startWidth;
-      resizer.addEventListener("mousedown", (e) => {
-        startX = e.pageX;
-        startWidth = th.offsetWidth;
-        document.addEventListener("mousemove", resizeColumn);
-        document.addEventListener("mouseup", stopResize);
-      });
-
-      function resizeColumn(e) {
-        const newWidth = startWidth + (e.pageX - startX);
-        th.style.width = newWidth + "px";
-      }
-
-      function stopResize() {
-        document.removeEventListener("mousemove", resizeColumn);
-        document.removeEventListener("mouseup", stopResize);
-      }
-    });
-  }
-
-  // call on initial load (if table exists)
-  const table = document.getElementById("scheduleTable");
-  if (table) makeTableResizable(table);
-});
-
-// ---------------- MAIN LOGIC (generateSchedule, adjustments, etc.) ----------------
-function generateSchedule() {
-  const startInput = document.getElementById("startDate").value;
-  const startIndex = parseInt(document.getElementById("startActivity").value);
-  if (!startInput) return alert("Please select a start date.");
-
-  const startDate = new Date(startInput);
-  const body = document.getElementById("tableBody");
-  body.innerHTML = "";
-  const computed = {};
-  let current = new Date(startDate);
-
-  displayProjectInfo(); // ensure project info is visible and saved before generating
-
-  for (let i = startIndex; i < consultingActivities.length; i++) {
-    const act = consultingActivities[i];
-    let date = addWorkingDays(current, act.min);
-
-    // Rule A: Pre-Bid >= Shortlisting + 7 CDs
-    if (i === 3 && computed[2]) {
-      const required = nextWorkingDay(addCalendarDays(computed[2], 7));
-      if (required > date) date = required;
-    }
-
-    // Rule B: Deadline >= Pre-Bid + 12 CDs
-    if (i === 4 && computed[3]) {
-      const required = nextWorkingDay(addCalendarDays(computed[3], 12));
-      if (required > date) date = required;
-    }
-
-    date = nextWorkingDay(date);
-    computed[i] = date;
-    current = new Date(date);
-
-    const elapsed = daysBetween(startDate, date);
-    const tr = document.createElement("tr");
-    tr.dataset.index = i;
-    tr.innerHTML = `
-      <td>${act.name}</td>
-      <td>${act.min}</td>
-      <td>${act.max}</td>
-      <td><input type="number" value="0" class="adjust-input" /></td>
-      <td class="date-cell">${formatDate(date)}</td>
-      <td>${elapsed}</td>
-    `;
-    body.appendChild(tr);
-  }
-
-  const last = Object.keys(computed).pop();
-  document.getElementById("totalDays").textContent = daysBetween(
-    startDate,
-    computed[last]
+function renderHolidays() {
+  const list = $("holidayList");
+  list.innerHTML = holidays.length
+    ? `<p class="field-hint">${holidays.length} non-working date${holidays.length === 1 ? "" : "s"} added.</p><ul>${holidays.map((d) => `<li>${formatDate(localDate(d))}<button class="remove-holiday" data-date="${d}" type="button" aria-label="Remove ${formatDate(localDate(d))}">×</button></li>`).join("")}</ul>`
+    : '<p class="field-hint">No additional non-working dates. Weekends are always excluded.</p>';
+  list.querySelectorAll("button").forEach(
+    (b) =>
+      (b.onclick = () => {
+        holidays = holidays.filter((d) => d !== b.dataset.date);
+        persist();
+        renderHolidays();
+        renderProjects();
+      }),
   );
-  attachAdjustListeners(startIndex, startDate);
 }
-
-function attachAdjustListeners(startIndex, startDate) {
-  document
-    .querySelectorAll(".adjust-input")
-    .forEach((i) =>
-      i.addEventListener("change", () => adjustSchedule(startIndex, startDate))
+function addHoliday() {
+  const d = $("holidayPicker").value;
+  if (!validDate(d))
+    return fieldError("holidayPicker", "Choose a valid date to add.");
+  if (holidays.includes(d))
+    return fieldError("holidayPicker", "That date is already included.");
+  holidays.push(d);
+  holidays.sort();
+  $("holidayPicker").value = "";
+  fieldError("holidayPicker", "");
+  persist();
+  renderHolidays();
+  renderProjects();
+  status("Non-working date added.");
+}
+function calculate(p) {
+  let current = localDate(p.startDate),
+    computed = {};
+  return activities.slice(p.startActivity).map((a, o) => {
+    const i = p.startActivity + o,
+      extra = Number(p.adjustments[i] || 0);
+    let d = addWorking(current, a.min + extra);
+    if (i === 3 && computed[2])
+      d = new Date(Math.max(d, nextWorking(addCalendar(computed[2], 7))));
+    if (i === 4 && computed[3])
+      d = new Date(Math.max(d, nextWorking(addCalendar(computed[3], 12))));
+    d = nextWorking(d);
+    computed[i] = d;
+    current = new Date(d);
+    return { a, i, d, extra };
+  });
+}
+function renderCard(p) {
+  const start = localDate(p.startDate),
+    rows = calculate(p),
+    last = rows.at(-1);
+  return `<article class="project-schedule" data-id="${p.id}"><header class="print-project-header"><img src="tup_logo.png" alt=""><div><p>Technological University of the Philippines – Manila</p><strong>Consulting Services Procurement Scheduler</strong><span>2016 Revised IRR of RA 9184 · Annex “C”</span></div></header><div class="schedule-heading"><div><p class="eyebrow">Generated procurement timeline</p><h3>${escape(p.title)}</h3></div><button type="button" class="button button-danger remove-project" data-id="${p.id}">Remove project</button></div><div class="display-details"><div><span class="detail-label">Project title</span><span class="detail-value">${escape(p.title)}</span></div><div><span class="detail-label">Approved Budget for the Contract</span><span class="detail-value">${peso(p.budget)}</span></div><div><span class="detail-label">Start date and time</span><span class="detail-value">${formatDate(start)} · ${formatTime(p.startTime)}</span></div><div><span class="detail-label">End time</span><span class="detail-value">${formatTime(p.endTime)}</span></div></div><div class="table-container" tabindex="0"><table><thead><tr><th>Procurement activity</th><th>Minimum days</th><th>Maximum days</th><th>Additional days</th><th>Scheduled date</th><th>Elapsed calendar days</th></tr></thead><tbody>${rows.map((r) => `<tr><td>${r.a.name}</td><td>${r.a.min}</td><td>${r.a.max}</td><td><input class="adjust-input" type="number" min="0" max="3650" step="1" value="${r.extra}" data-id="${p.id}" data-index="${r.i}" aria-label="Additional days for ${r.a.name}"><span class="row-error"></span></td><td>${formatDate(r.d)}</td><td>${between(start, r.d)}</td></tr>`).join("")}</tbody><tfoot><tr><th colspan="5">Total calendar days</th><td>${between(start, last.d).toLocaleString("en-PH")}</td></tr></tfoot></table></div><footer class="schedule-footer"><div class="signature"><p>Prepared by:</p><div class="signature-line"></div><p class="signature-note">Name and signature</p></div><p class="printed-date">Created: ${formatDateTime(new Date(p.createdAt))}<br>Printed: <span class="print-time">${formatDateTime()}</span></p></footer></article>`;
+}
+function renderProjects() {
+  const list = $("scheduleList");
+  list.innerHTML = projects.map(renderCard).join("");
+  $("projectSchedules").hidden = !projects.length;
+  $("projectCount").textContent =
+    `${projects.length} project${projects.length === 1 ? "" : "s"} ready to print`;
+  $("printBtn").disabled = !projects.length;
+  list.querySelectorAll(".remove-project").forEach(
+    (b) =>
+      (b.onclick = () => {
+        projects = projects.filter((p) => p.id !== b.dataset.id);
+        persist();
+        renderProjects();
+        status("Project schedule removed.");
+      }),
+  );
+  list.querySelectorAll(".adjust-input").forEach(
+    (input) =>
+      (input.onchange = () => {
+        const v = Number(input.value),
+          err = input.nextElementSibling;
+        if (!Number.isInteger(v) || v < 0 || v > 3650) {
+          input.setAttribute("aria-invalid", "true");
+          err.textContent = "Use a whole number from 0 to 3,650.";
+          return;
+        }
+        projects.find((p) => p.id === input.dataset.id).adjustments[
+          input.dataset.index
+        ] = v;
+        persist();
+        renderProjects();
+      }),
+  );
+}
+function addProject(e) {
+  e.preventDefault();
+  if (!validate())
+    return status(
+      "Review the highlighted fields before adding this project.",
+      true,
     );
+  const p = {
+    id: crypto.randomUUID
+      ? crypto.randomUUID()
+      : `${Date.now()}-${Math.random()}`,
+    title: $("projectTitle").value.trim(),
+    budget: money($("projectBudget").value),
+    startActivity: +$("startActivity").value,
+    startDate: $("startDate").value,
+    startTime: $("startTime").value,
+    endTime: $("endTime").value,
+    adjustments: {},
+    createdAt: new Date().toISOString(),
+  };
+  projects.push(p);
+  persist();
+  renderProjects();
+  $("schedulerForm").reset();
+  $("startActivity").value = "0";
+  status(`Added “${p.title}”. You can now enter another project.`);
 }
-
-function adjustSchedule(startIndex, startDate) {
-  const body = document.getElementById("tableBody");
-  const rows = Array.from(body.querySelectorAll("tr"));
-  const computed = {};
-  let current = new Date(startDate);
-
-  rows.forEach((row, idx) => {
-    const i = startIndex + idx;
-    const act = consultingActivities[i];
-    const add = parseInt(row.querySelector(".adjust-input").value) || 0;
-    let date = addWorkingDays(current, act.min + add);
-    date = nextWorkingDay(date);
-    computed[i] = date;
-    current = new Date(date);
-    row.querySelector(".date-cell").innerHTML = formatDate(date); // reset
-    row.classList.remove("violates-rule");
-  });
-
-  warnIfRuleBroken(computed, body);
-  attachAdjustListeners(startIndex, startDate);
-
-  const last = Object.keys(computed).pop();
-  document.getElementById("totalDays").textContent = daysBetween(
-    startDate,
-    computed[last]
+function restore() {
+  $("startActivity").innerHTML = activities
+    .map((a, i) => `<option value="${i}">${a.name}</option>`)
+    .join("");
+  try {
+    const h = JSON.parse(localStorage.getItem("consultingHolidays"));
+    if (Array.isArray(h)) holidays = [...new Set(h.filter(validDate))].sort();
+    const saved = JSON.parse(localStorage.getItem("consultingProjects"));
+    if (Array.isArray(saved))
+      projects = saved
+        .filter(
+          (p) =>
+            p &&
+            typeof p.id === "string" &&
+            typeof p.title === "string" &&
+            money(p.budget) !== null &&
+            validDate(p.startDate) &&
+            Number.isInteger(p.startActivity) &&
+            p.startActivity >= 0 &&
+            p.startActivity < activities.length,
+        )
+        .map((p) => ({
+          ...p,
+          startTime: p.startTime || "",
+          endTime: p.endTime || "",
+          adjustments: p.adjustments || {},
+        }));
+  } catch {
+    localStorage.removeItem("consultingProjects");
+  }
+  renderHolidays();
+  renderProjects();
+}
+$("schedulerForm").onsubmit = addProject;
+$("addHolidayBtn").onclick = addHoliday;
+$("saveHolidaysBtn").onclick = () => {
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(
+    new Blob([JSON.stringify(holidays, null, 2)], { type: "application/json" }),
   );
-}
-
-function warnIfRuleBroken(computed, body) {
-  // Rule A
-  if (computed[2] && computed[3]) {
-    const req = nextWorkingDay(addCalendarDays(computed[2], 7));
-    if (computed[3] < req) showViolation(body, 3, req);
-  }
-  // Rule B
-  if (computed[3] && computed[4]) {
-    const req = nextWorkingDay(addCalendarDays(computed[3], 12));
-    if (computed[4] < req) showViolation(body, 4, req);
-  }
-}
-
-function showViolation(body, index, requiredDate) {
-  const row = body.querySelector(`tr[data-index="${index}"]`);
-  if (!row) return;
-  row.classList.add("violates-rule");
-
-  const cell = row.querySelector(".date-cell");
-  cell.innerHTML += `
-    <div class="rule-warning">
-      ⚠ Must be on/after ${formatDate(requiredDate)}
-      <button class="restore-btn">Restore</button>
-    </div>
-  `;
-
-  const btn = cell.querySelector(".restore-btn");
-  btn.addEventListener("click", () => {
-    generateSchedule();
-    alert(`Restored default date for "${consultingActivities[index].name}".`);
-  });
-}
-
-// ---------------- PRINT / SAVE as PDF (Updated) ----------------
-
-// ✅ Added: handlePrint() — ensures project details are updated, includes Start Date & Time in 12-hour format,
-// and prints the table. Formats ABC via displayProjectInfo (which uses formatPeso).
-function handlePrint() {
-  // Ensure display is up-to-date (formats ABC for display and saves raw values)
-  displayProjectInfo();
-
-  const printContent = document.querySelector(".table-container").outerHTML;
-  const projectDetails = document.getElementById("displayProjectDetails").outerHTML;
-  const title = document.querySelector("h1").outerHTML;
-  const subtitle = document.querySelector("h2").outerHTML;
-
-  // Retrieve Start Date and Time (if provided)
-  const startDate = document.getElementById("startDate").value;
-  const startTime = document.getElementById("startTime").value;
-  const formattedDate = startDate
-    ? new Date(startDate).toLocaleDateString("en-US", {
-        year: "numeric",
-        month: "long",
-        day: "numeric",
-      })
-    : "";
-  const formattedTime = formatTime12Hour(startTime);
-
-  const dateTimeLine =
-    startDate || startTime
-      ? `<p style="text-align:center; font-size:10pt; margin-top:4px;">
-          Start Date & Time: ${formattedDate} ${formattedTime ? "– " + formattedTime : ""}
-        </p>`
-      : "";
-
-  const newWin = window.open("", "_blank");
-  newWin.document.write(`
-      <html>
-        <head>
-          <title>Consulting Schedule</title>
-          <style>
-            @page { size: A4; margin: 1cm; }
-            body { font-family: Arial, sans-serif; color: #000; margin: 0; padding: 0; }
-            h1, h2 { text-align: center; margin: 0; }
-            h1 { font-size: 16pt; }
-            h2 { font-size: 12pt; margin-bottom: 6px; }
-            .display-details { border: 1px solid #000; padding: 8px; margin-bottom: 10px; }
-            table { width: 100%; border-collapse: collapse; font-size: 9pt; }
-            th, td { border: 1px solid #000; padding: 4px; text-align: center; }
-            th { background: #ccc; }
-            tfoot td { font-weight: bold; }
-            .table-container { width: 100%; }
-          </style>
-        </head>
-        <body>
-          ${title}
-          ${subtitle}
-          ${dateTimeLine}
-          ${projectDetails}
-          ${printContent}
-        </body>
-      </html>
-    `);
-  newWin.document.close();
-  newWin.focus();
-  newWin.print();
-}
-
-// ---------------- LOAD ON STARTUP (duplicate prevention & original features kept) ----------------
-// Already handled earlier in the single window.load listener above
-
-// (The rest of the original code has been preserved above.)
-// End of consulting.js
+  a.download = "tup-manila-non-working-dates.json";
+  a.click();
+  URL.revokeObjectURL(a.href);
+};
+$("loadHolidaysBtn").onclick = () => {
+  const f = $("loadHolidaysFile").files[0];
+  if (!f || f.size > 1048576)
+    return status(
+      f
+        ? "The holiday list must be smaller than 1 MB."
+        : "Choose a JSON holiday list to load.",
+      true,
+    );
+  const r = new FileReader();
+  r.onload = () => {
+    try {
+      const d = JSON.parse(r.result);
+      if (!Array.isArray(d) || d.some((x) => !validDate(x))) throw 0;
+      holidays = [...new Set(d)].sort();
+      persist();
+      renderHolidays();
+      renderProjects();
+      status("Holiday list loaded.");
+    } catch {
+      status("Invalid holiday list. Use valid YYYY-MM-DD dates.", true);
+    }
+  };
+  r.onerror = () => status("The selected file could not be read.", true);
+  r.readAsText(f);
+};
+$("printBtn").onclick = () => {
+  document
+    .querySelectorAll(".print-time")
+    .forEach((n) => (n.textContent = formatDateTime()));
+  window.print();
+};
+$("projectBudget").onblur = () => {
+  const n = money($("projectBudget").value);
+  if (n !== null) $("projectBudget").value = peso(n).replace("₱", "").trim();
+};
+restore();

@@ -1,469 +1,589 @@
-/* ---------- Project Info Styling ---------- */
-.project-info {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  margin-bottom: 20px;
+:root {
+  --maroon: #8b1538;
+  --dark: #65102a;
+  --ink: #1f2937;
+  --muted: #5f6b7a;
+  --line: #d8dee8;
+  --canvas: #f4f6f9;
+  --danger: #b42318;
 }
 
-.project-info input[type="text"] {
-  padding: 8px;
-  border-radius: 8px;
-  border: 1px solid #ccc;
-  font-size: 1em;
+/* Align the action with the date input, not the field-validation line. */
+.holiday-controls > .button {
+  margin-bottom: 1.55em;
 }
 
-.display-details {
-  background: #e6f2ff;
-  border-radius: 8px;
-  padding: 10px 15px;
-  margin-bottom: 15px;
-  font-size: 0.95em;
-  color: #003366;
-}
-
-.display-details strong {
-  color: #000;
-}
-
-/* Ensure project info prints */
-@media print {
-  .display-details {
-    display: block !important;
-    margin-bottom: 10px;
-    border: 1px solid #000;
-    color: #000;
-    background: #fff;
+@media (max-width: 760px) {
+  .holiday-controls > .button {
+    margin-bottom: 0;
   }
 }
-
+* {
+  box-sizing: border-box;
+}
 body {
-  font-family: Arial, sans-serif;
-  background: #f5f9ff;
-  color: #222;
   margin: 0;
-  padding: 0;
+  min-width: 320px;
+  font-family: Inter, "Segoe UI", Arial, sans-serif;
+  font-size: clamp(15px, 0.9vw, 18px);
+  line-height: 1.5;
+  color: var(--ink);
+  background: var(--canvas);
 }
-
-.container {
-  max-width: 1000px;
-  margin: 30px auto;
-  padding: 20px;
+.app-shell {
+  padding: clamp(16px, 3vw, 56px);
+}
+.app-card {
+  width: min(100%, 1440px);
+  margin: auto;
+  padding: clamp(20px, 3vw, 48px);
   background: #fff;
-  border-radius: 12px;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  border: 1px solid #e7ebf0;
+  border-radius: 18px;
+  box-shadow: 0 12px 32px #192a4614;
 }
-
+.app-header,
+.print-project-header {
+  display: flex;
+  gap: clamp(14px, 2vw, 28px);
+  align-items: center;
+}
+.app-header {
+  padding-bottom: 24px;
+  border-bottom: 4px solid var(--maroon);
+}
+.screen-logo {
+  width: clamp(58px, 6vw, 92px);
+  height: auto;
+}
+.eyebrow {
+  margin: 0 0 3px;
+  color: var(--maroon);
+  font-weight: 700;
+  font-size: 0.82em;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
 h1,
-h2 {
-  text-align: center;
+h2,
+p {
+  margin-top: 0;
+}
+h1 {
+  margin-bottom: 4px;
+  font-size: clamp(1.45rem, 2.5vw, 2.25rem);
+  line-height: 1.15;
+}
+h2,
+h3 {
+  margin-bottom: 0;
+}
+.subtitle,
+.field-hint,
+.generated-at,
+.signature-note {
+  color: var(--muted);
+  font-size: 0.88em;
+}
+.subtitle {
   margin: 0;
 }
-
-h1 {
-  color: #004a99;
+.landing-link {
+  display: inline-block;
+  margin-top: 8px;
+  color: var(--maroon);
+  font-size: 0.82em;
+  font-weight: 700;
 }
-
-h2 {
-  font-size: 1rem;
-  color: #555;
-  margin-bottom: 20px;
+form {
+  margin-top: 28px;
 }
-
-.input-section {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  margin-bottom: 20px;
+fieldset {
+  margin: 0 0 20px;
+  padding: 20px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
 }
-
-input[type="date"],
-input[type="text"],
+legend {
+  padding: 0 8px;
+  color: var(--dark);
+  font-weight: 750;
+}
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 18px;
+}
+.project-grid {
+  grid-template-columns: 2fr 1fr;
+}
+.field {
+  min-width: 0;
+}
+label {
+  display: block;
+  margin-bottom: 6px;
+  font-weight: 650;
+}
+.optional {
+  color: var(--muted);
+  font-weight: 400;
+}
+input,
 select {
-  padding: 8px;
+  width: 100%;
+  min-height: 46px;
+  padding: 10px 12px;
+  color: var(--ink);
+  font: inherit;
+  background: #fff;
+  border: 1px solid #aab5c4;
   border-radius: 8px;
-  border: 1px solid #ccc;
-  font-size: 1em;
 }
-
-/* ✅ Unified button row layout */
+input:focus,
+select:focus,
+button:focus-visible,
+.file-label:focus-within {
+  outline: 3px solid #0b6e994d;
+  outline-offset: 2px;
+  border-color: #0b6e99;
+}
+input[aria-invalid="true"] {
+  border-color: var(--danger);
+}
+.field-hint,
+.field-error {
+  margin: 5px 0 0;
+  font-size: 0.78em;
+}
+.field-error {
+  min-height: 1.2em;
+  color: var(--danger);
+  font-weight: 600;
+}
+.currency-input {
+  display: flex;
+  overflow: hidden;
+  border: 1px solid #aab5c4;
+  border-radius: 8px;
+}
+.currency-input span {
+  padding: 10px 0 10px 12px;
+  color: var(--muted);
+}
+.currency-input input {
+  border: 0;
+  border-radius: 0;
+}
+.holiday-controls {
+  display: flex;
+  align-items: end;
+  gap: 12px;
+}
+.holiday-controls .field {
+  width: min(100%, 340px);
+}
+.holiday-list {
+  margin-top: 14px;
+}
+.holiday-list ul {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 0;
+  margin: 0;
+  list-style: none;
+}
+.holiday-list li {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  padding: 6px 8px 6px 10px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: #f8fafc;
+  font-size: 0.85em;
+}
+.remove-holiday {
+  border: 0;
+  border-radius: 50%;
+  color: var(--maroon);
+  background: transparent;
+  font-size: 1.1em;
+  cursor: pointer;
+}
+.file-actions,
 .button-row {
   display: flex;
   flex-wrap: wrap;
-  gap: 10px;
-  justify-content: center;
   align-items: center;
-  margin-bottom: 20px;
+  gap: 10px;
+  margin-top: 18px;
 }
-
-button {
-  background-color: #007bff;
-  color: white;
-  border: none;
+.button-row {
+  justify-content: flex-end;
+}
+.button {
+  min-height: 46px;
+  padding: 10px 16px;
+  border: 1px solid transparent;
   border-radius: 8px;
-  padding: 10px 14px;
+  font: 700 0.92em/1.2 inherit;
   cursor: pointer;
-  transition: 0.3s;
-  font-size: 0.95em;
 }
-
-button.secondary {
-  background-color: #28a745;
+.button:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
 }
-
-button:hover {
-  opacity: 0.9;
+.button-primary {
+  color: #fff;
+  background: var(--maroon);
 }
-
-#loadHolidaysFile {
-  padding: 6px;
-  border: 1px solid #ccc;
+.button-secondary {
+  color: #fff;
+  background: #155f82;
+}
+.button-danger {
+  color: #8e201b;
+  border-color: #e7b4b0;
+  background: #fff;
+}
+.button-outline {
+  color: var(--maroon);
+  border-color: var(--maroon);
+  background: #fff;
+}
+.button-quiet {
+  color: #263b50;
+  border-color: #aab5c4;
+  background: #fff;
+}
+.file-label {
+  min-height: 46px;
+  padding: 10px 12px;
+  border: 1px solid #aab5c4;
   border-radius: 8px;
-  background: #f8f8f8;
-  font-size: 0.9em;
+  cursor: pointer;
+  font-size: 0.88em;
 }
-
-/* Table styles */
-table {
-  width: 100%;
-  border-collapse: collapse;
-  margin-top: 10px;
-  font-size: 0.95em;
-}
-
-th,
-td {
-  border: 1px solid #ddd;
-  padding: 8px;
-  text-align: center;
-}
-
-th {
-  background-color: #004a99;
-  color: white;
-}
-
-tfoot {
-  background: #e6f2ff;
-  font-weight: bold;
-}
-
-#holidayList ul {
-  list-style-type: none;
+.file-label input {
+  width: auto;
+  min-height: 0;
   padding: 0;
+  margin-left: 6px;
+  border: 0;
 }
-
-#holidayList li {
-  background: #e6f2ff;
-  border-radius: 6px;
-  margin: 4px 0;
-  padding: 5px 10px;
+.form-status {
+  min-height: 0;
+  margin-top: 18px;
+}
+.form-status:not(:empty) {
+  padding: 10px 12px;
+  border-left: 4px solid #16794a;
+  background: #eaf7ef;
+  color: #145c39;
+}
+.form-status.is-error {
+  border-color: var(--danger);
+  background: #fff0ef;
+  color: #8e201b;
+}
+.project-schedules {
+  margin-top: 32px;
+  padding-top: 24px;
+  border-top: 1px solid var(--line);
+}
+.project-schedule {
+  margin-top: 24px;
+  padding: 24px;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: #fff;
+}
+.schedule-heading {
   display: flex;
   justify-content: space-between;
-  align-items: center;
+  gap: 16px;
+  align-items: end;
+  margin-bottom: 14px;
 }
-
-#holidayList button {
-  background-color: #dc3545;
-  padding: 4px 8px;
-  border-radius: 4px;
-  font-size: 0.8em;
+.schedule-heading h3 {
+  margin: 0;
+  font-size: 1.2em;
 }
-
-#holidayList h4 {
-  margin-bottom: 5px;
+.generated-at {
+  margin: 0;
+  text-align: right;
 }
-
-/* Rule Violation Styling */
-.violates-rule {
-  background-color: #fff6e6 !important;
-  border-left: 4px solid #ff8c00;
+.display-details {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
+  margin-bottom: 16px;
+  padding: 16px;
+  border-radius: 10px;
+  background: #f7f9fc;
+  border-left: 4px solid var(--maroon);
 }
-
-.rule-warning {
-  margin-top: 4px;
-  font-size: 0.8em;
-  color: #8a4b00;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
+.detail-label {
+  display: block;
+  color: var(--muted);
+  font-size: 0.78em;
 }
-
-.rule-warning .restore-btn {
-  background-color: #ffc107;
-  color: #000;
-  border: none;
-  border-radius: 6px;
-  padding: 4px 10px;
-  margin-top: 4px;
-  cursor: pointer;
-  font-size: 0.8em;
+.detail-value {
+  font-weight: 700;
+  overflow-wrap: anywhere;
 }
-
-.rule-warning .restore-btn:hover {
-  background-color: #e0a800;
-}
-
-/* Responsive */
-@media (max-width: 768px) {
-  .container {
-    width: 95%;
-    padding: 10px;
-  }
-  h1 {
-    font-size: 1.5em;
-  }
-  h2 {
-    font-size: 0.9em;
-  }
-  .button-row {
-    flex-direction: column;
-  }
-  table,
-  th,
-  td {
-    font-size: 0.85em;
-  }
-}
-
-/* Print */
-@media print {
-  body {
-    background: white;
-  }
-  .input-section,
-  .button-row {
-    display: none;
-  }
-  table {
-    border: 1px solid #000;
-    font-size: 0.9em;
-  }
-  th {
-    background-color: #ccc !important;
-    color: #000 !important;
-  }
-}
-
-/* ---------- Adjustable Table Styling ---------- */
 .table-container {
-  width: 100%;
-  overflow-x: auto; /* allows horizontal scrolling if needed */
-  margin-top: 10px;
+  overflow-x: auto;
+  border: 1px solid var(--line);
+  border-radius: 10px;
 }
-
-#scheduleTable {
+table {
   width: 100%;
+  min-width: 840px;
   border-collapse: collapse;
-  table-layout: fixed; /* allows column resizing */
-  resize: both;
-  overflow: auto;
+  font-size: 0.9em;
 }
-
-#scheduleTable th,
-#scheduleTable td {
-  border: 1px solid #ddd;
-  padding: 8px;
+th,
+td {
+  padding: 12px;
+  border-bottom: 1px solid var(--line);
   text-align: center;
-  resize: horizontal; /* allow individual column resizing */
-  overflow: hidden;
+  vertical-align: middle;
 }
-
-/* Cursor feedback for resize */
-#scheduleTable th {
-  background-color: #004a99;
-  color: white;
-  cursor: col-resize;
-  position: relative;
+thead th {
+  color: #fff;
+  background: var(--dark);
+  font-weight: 700;
 }
-
-/* Keep responsiveness */
-@media (max-width: 768px) {
-  .table-container {
-    overflow-x: scroll;
-  }
+tbody td:first-child {
+  min-width: 240px;
+  text-align: left;
+  font-weight: 650;
 }
-
-@media print {
-  @page {
-    size: A4;
-    margin: 1cm;
-  }
-
-  body {
-    width: 210mm;
-    height: 297mm;
-    overflow: hidden;
-  }
-
-  .container {
-    box-shadow: none;
-    border: none;
-    width: 100%;
+tbody tr:nth-child(even) {
+  background: #fafbfd;
+}
+tfoot {
+  background: #f0f3f8;
+  font-weight: 750;
+}
+tfoot th {
+  text-align: right;
+}
+.adjust-input {
+  width: 88px;
+  min-height: 38px;
+  text-align: center;
+  padding: 5px;
+}
+.row-error {
+  display: block;
+  margin-top: 5px;
+  color: var(--danger);
+  font-size: 0.78em;
+}
+.schedule-footer {
+  display: flex;
+  justify-content: space-between;
+  gap: 24px;
+  margin-top: 38px;
+}
+.signature {
+  width: min(100%, 300px);
+}
+.signature p {
+  margin-bottom: 22px;
+}
+.signature-line {
+  border-bottom: 1px solid var(--ink);
+}
+.signature-note {
+  margin: 5px 0 !important;
+  text-align: center;
+}
+.printed-date {
+  align-self: end;
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.82em;
+  text-align: right;
+}
+.print-project-header {
+  display: none;
+}
+@media (max-width: 760px) {
+  .app-shell {
     padding: 0;
   }
-
-  .input-section,
-  .button-row,
-  #holidayList {
-    display: none !important;
+  .app-card {
+    padding: 20px 16px;
+    border: 0;
+    border-radius: 0;
+    box-shadow: none;
   }
-
-  table {
-    font-size: 9pt;
+  .form-grid,
+  .project-grid,
+  .display-details {
+    grid-template-columns: 1fr;
   }
-}
-
-/* ---------- Project Info Styling ---------- */
-.project-info {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  margin-bottom: 20px;
-}
-
-.project-info input[type="text"] {
-  padding: 8px;
-  border-radius: 8px;
-  border: 1px solid #ccc;
-  font-size: 1em;
-}
-
-.display-details {
-  background: #e6f2ff;
-  border-radius: 8px;
-  padding: 10px 15px;
-  margin-bottom: 15px;
-  font-size: 0.95em;
-  color: #003366;
-}
-
-.display-details strong {
-  color: #000;
-}
-
-/* ---------- Print Settings ---------- */
-@media print {
-  body {
-    background: white;
+  .holiday-controls,
+  .schedule-heading,
+  .schedule-footer {
+    align-items: stretch;
+    flex-direction: column;
   }
-
-  /* Hide everything outside printArea */
-  body * {
-    visibility: hidden;
-  }
-
-  #printArea,
-  #printArea * {
-    visibility: visible;
-  }
-
-  #printArea {
-    position: absolute;
-    left: 0;
-    top: 0;
+  .holiday-controls .field {
     width: 100%;
   }
-
-  /* Clean print style */
-  .button-row,
-  .input-section,
-  .project-info {
-    display: none !important;
+  .button-row {
+    justify-content: stretch;
   }
-
-  table {
-    border: 1px solid #000;
-    font-size: 0.9em;
+  .button-row .button {
+    flex: 1;
   }
-
-  th {
-    background-color: #ccc !important;
-    color: #000 !important;
+  .file-actions {
+    align-items: stretch;
+    flex-direction: column;
   }
-
-  .display-details {
-    display: block !important;
-    border: 1px solid #000;
-    color: #000;
-    background: #fff;
+  .generated-at,
+  .printed-date {
+    text-align: left;
+  }
+  .project-schedule {
+    padding: 16px;
   }
 }
-
-/* ---------- Project Info Styling ---------- */
-.project-info {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  margin-bottom: 20px;
+@media (min-width: 1800px) {
+  .app-card {
+    max-width: 1900px;
+  }
+  .form-grid {
+    gap: 24px;
+  }
+  th,
+  td {
+    padding: 16px;
+  }
+  .button,
+  input,
+  select {
+    min-height: 56px;
+  }
 }
-
-.project-info input[type="text"] {
-  padding: 8px;
-  border-radius: 8px;
-  border: 1px solid #ccc;
-  font-size: 1em;
-}
-
-.display-details {
-  background: #e6f2ff;
-  border-radius: 8px;
-  padding: 10px 15px;
-  margin-bottom: 15px;
-  font-size: 0.95em;
-  color: #003366;
-}
-
-.display-details strong {
-  color: #000;
-}
-
-/* ---------- Print Settings ---------- */
 @media print {
+  @page {
+    size: A4 landscape;
+    margin: 12mm;
+  }
   body {
-    background: white;
+    background: #fff;
+    font-size: 10pt;
   }
-
-  /* Hide everything outside printArea */
-  body * {
-    visibility: hidden;
+  .app-shell,
+  .app-card {
+    padding: 0;
+    border: 0;
+    box-shadow: none;
   }
-
-  #printArea,
-  #printArea * {
-    visibility: visible;
-  }
-
-  #printArea {
-    position: absolute;
-    left: 0;
-    top: 0;
-    width: 100%;
-  }
-
-  /* Hide unnecessary elements */
-  .button-row,
-  .input-section,
-  .project-info {
+  .app-header,
+  form,
+  .form-status,
+  .project-schedules > .schedule-heading {
     display: none !important;
   }
-
-  /* Keep and style project details */
+  .project-schedules {
+    margin: 0;
+    padding: 0;
+    border: 0;
+  }
+  .project-schedule {
+    margin: 0;
+    padding: 0;
+    border: 0;
+    border-radius: 0;
+    break-after: page;
+    page-break-after: always;
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+  .project-schedule:last-child {
+    break-after: auto;
+    page-break-after: auto;
+  }
+  .print-project-header {
+    display: flex;
+    gap: 12px;
+    padding: 0 0 8px;
+    margin-bottom: 10px;
+    border-bottom: 2px solid #000;
+  }
+  .print-project-header img {
+    width: 50px;
+    height: auto;
+  }
+  .print-project-header p,
+  .print-project-header strong,
+  .print-project-header span {
+    display: block;
+    margin: 0;
+  }
+  .print-project-header p {
+    font-weight: 700;
+  }
+  .print-project-header span {
+    font-size: 8.5pt;
+  }
+  .project-schedule .schedule-heading {
+    margin-bottom: 8px;
+  }
+  .project-schedule .eyebrow,
+  .remove-project {
+    display: none !important;
+  }
   .display-details {
-    display: block !important;
-    border: 1px solid #000;
-    background: #fff;
-    color: #000;
-    margin-bottom: 15px;
+    grid-template-columns: repeat(4, 1fr);
+    padding: 7px;
+    border: 1px solid #555;
+    border-left: 4px solid #000;
   }
-
+  .table-container {
+    overflow: visible;
+    border: 0;
+    border-radius: 0;
+  }
   table {
-    border: 1px solid #000;
-    font-size: 0.9em;
+    min-width: 0;
+    font-size: 8.2pt;
   }
-
-  th {
-    background-color: #ccc !important;
+  th,
+  td {
+    padding: 4px;
+    border: 1px solid #555;
+  }
+  thead th {
     color: #000 !important;
+    background: #e5e5e5 !important;
+  }
+  tbody tr:nth-child(even) {
+    background: #fff;
+  }
+  .adjust-input {
+    width: 40px;
+    min-height: 0;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    appearance: textfield;
+  }
+  .row-error {
+    display: none;
+  }
+  .schedule-footer {
+    margin-top: 18px;
+  }
+  .printed-date {
+    color: #000;
   }
 }
