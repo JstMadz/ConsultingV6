@@ -60,9 +60,79 @@
           </a>
         </div>
       </section>
-      <footer>
-        Use the appropriate scheduler based on your procurement requirement.
+      <footer class="site-footer">
+        <div class="footer-container">
+          <div class="footer-text">
+            <p class="footer-copyright">
+              © 2026 Technological University of the Philippines - Manila
+            </p>
+            <p class="footer-office">
+              Procurement Office<br />Bidding Scheduler and Planner
+            </p>
+            <p class="footer-credit">
+              Created by
+              <a
+                href="https://github.com/madzmador"
+                target="_blank"
+                rel="noopener noreferrer"
+                >@madzmador</a
+              >
+            </p>
+          </div>
+          <div class="visitor-badge">
+            <span class="visitor-icon" aria-hidden="true">
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8Z" />
+                <circle cx="12" cy="12" r="3" />
+              </svg>
+            </span>
+            <span class="visitor-meta">
+              <span class="visitor-label">Total visitors</span>
+              <span id="visitorCount" class="visitor-count"
+                ><span class="digit-loading">•••</span></span
+              >
+            </span>
+          </div>
+        </div>
       </footer>
     </main>
+    <script>
+      (() => {
+        const countEl = document.getElementById("visitorCount");
+        if (!countEl) return;
+        const NAMESPACE = "tup-manila-procurement-scheduler";
+        const KEY = "site-visits";
+        const animateCount = (target) => {
+          const duration = 900;
+          let start = null;
+          const tick = (timestamp) => {
+            if (start === null) start = timestamp;
+            const progress = Math.min((timestamp - start) / duration, 1);
+            const eased = 1 - Math.pow(1 - progress, 3);
+            countEl.textContent = Math.floor(eased * target).toLocaleString();
+            if (progress < 1) requestAnimationFrame(tick);
+            else countEl.textContent = target.toLocaleString();
+          };
+          requestAnimationFrame(tick);
+        };
+        fetch(`https://abacus.jasoncameron.dev/hit/${NAMESPACE}/${KEY}`)
+          .then((res) => {
+            if (!res.ok) throw new Error("Counter unavailable");
+            return res.json();
+          })
+          .then((data) => animateCount(data.value))
+          .catch(() => {
+            countEl.textContent = "—";
+            countEl.classList.add("visitor-count-error");
+          });
+      })();
+    </script>
   </body>
 </html>
