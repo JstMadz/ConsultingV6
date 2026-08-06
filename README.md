@@ -269,18 +269,22 @@ Recommended:
 # Project Structure
 
 ```
-Consulting-Procurement-Scheduler
+ConsultingV6
 │
-├── consulting.html
-├── consulting.css
-├── consulting.js
+├── index.html              # Landing page / scheduler picker
+├── consulting.html         # Consulting Services Procurement Scheduler
 ├── README.md
 ├── LICENSE
 │
-└── images
-    ├── home.png
-    ├── schedule.png
-    └── print-preview.png
+└── assets
+    ├── css
+    │   ├── landing.css     # Styles for index.html
+    │   └── consulting.css  # Styles for consulting.html
+    ├── js
+    │   ├── consulting.js       # Scheduler logic for consulting.html
+    │   └── visitor-counter.js  # Shared visitor counter widget
+    └── images
+        └── tup-logo.png
 ```
 
 ---

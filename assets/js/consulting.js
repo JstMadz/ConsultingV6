@@ -177,7 +177,7 @@ function renderCard(p) {
   const start = localDate(p.startDate),
     rows = calculate(p),
     last = rows.at(-1);
-  return `<article class="project-schedule" data-id="${p.id}"><header class="print-project-header"><img src="tup_logo.png" alt=""><div><p>Technological University of the Philippines – Manila</p><strong>Consulting Services Procurement Scheduler</strong><span>2016 Revised IRR of RA 9184 · Annex “C”</span></div></header><div class="schedule-heading"><div><p class="eyebrow">Generated procurement timeline</p><h3>${escape(p.title)}</h3></div><button type="button" class="button button-danger remove-project" data-id="${p.id}">Remove project</button></div><div class="display-details"><div><span class="detail-label">Project title</span><span class="detail-value">${escape(p.title)}</span></div><div><span class="detail-label">Approved Budget for the Contract</span><span class="detail-value">${peso(p.budget)}</span></div><div><span class="detail-label">Start date and time</span><span class="detail-value">${formatDate(start)} · ${formatTime(p.startTime)}</span></div><div><span class="detail-label">End time</span><span class="detail-value">${formatTime(p.endTime)}</span></div></div><div class="table-container" tabindex="0"><table><thead><tr><th>Procurement activity</th><th>Minimum days</th><th>Maximum days</th><th>Additional days</th><th>Scheduled date</th><th>Elapsed calendar days</th></tr></thead><tbody>${rows.map((r) => `<tr><td>${r.a.name}</td><td>${r.a.min}</td><td>${r.a.max}</td><td><input class="adjust-input" type="number" min="0" max="3650" step="1" value="${r.extra}" data-id="${p.id}" data-index="${r.i}" aria-label="Additional days for ${r.a.name}"><span class="row-error"></span></td><td>${formatDate(r.d)}</td><td>${between(start, r.d)}</td></tr>`).join("")}</tbody><tfoot><tr><th colspan="5">Total calendar days</th><td>${between(start, last.d).toLocaleString("en-PH")}</td></tr></tfoot></table></div><footer class="schedule-footer"><div class="signature"><p>Prepared by:</p><div class="signature-line"></div><p class="signature-note">Name and signature</p></div><p class="printed-date">Created: ${formatDateTime(new Date(p.createdAt))}<br>Printed: <span class="print-time">${formatDateTime()}</span></p></footer></article>`;
+  return `<article class="project-schedule" data-id="${p.id}"><header class="print-project-header"><img src="assets/images/tup-logo.png" alt=""><div><p>Technological University of the Philippines – Manila</p><strong>Consulting Services Procurement Scheduler</strong><span>2016 Revised IRR of RA 9184 · Annex “C”</span></div></header><div class="schedule-heading"><div><p class="eyebrow">Generated procurement timeline</p><h3>${escape(p.title)}</h3></div><button type="button" class="button button-danger remove-project" data-id="${p.id}">Remove project</button></div><div class="display-details"><div><span class="detail-label">Project title</span><span class="detail-value">${escape(p.title)}</span></div><div><span class="detail-label">Approved Budget for the Contract</span><span class="detail-value">${peso(p.budget)}</span></div><div><span class="detail-label">Start date and time</span><span class="detail-value">${formatDate(start)} · ${formatTime(p.startTime)}</span></div><div><span class="detail-label">End time</span><span class="detail-value">${formatTime(p.endTime)}</span></div></div><div class="table-container" tabindex="0"><table><thead><tr><th>Procurement activity</th><th>Minimum days</th><th>Maximum days</th><th>Additional days</th><th>Scheduled date</th><th>Elapsed calendar days</th></tr></thead><tbody>${rows.map((r) => `<tr><td>${r.a.name}</td><td>${r.a.min}</td><td>${r.a.max}</td><td><input class="adjust-input" type="number" min="0" max="3650" step="1" value="${r.extra}" data-id="${p.id}" data-index="${r.i}" aria-label="Additional days for ${r.a.name}"><span class="row-error"></span></td><td>${formatDate(r.d)}</td><td>${between(start, r.d)}</td></tr>`).join("")}</tbody><tfoot><tr><th colspan="5">Total calendar days</th><td>${between(start, last.d).toLocaleString("en-PH")}</td></tr></tfoot></table></div><footer class="schedule-footer"><div class="signature"><p>Prepared by:</p><div class="signature-line"></div><p class="signature-note">Name and signature</p></div><p class="printed-date">Created: ${formatDateTime(new Date(p.createdAt))}<br>Printed: <span class="print-time">${formatDateTime()}</span></p></footer></article>`;
 }
 function renderProjects() {
   const list = $("scheduleList");
@@ -321,33 +321,3 @@ $("projectBudget").onblur = () => {
   if (n !== null) $("projectBudget").value = peso(n).replace("₱", "").trim();
 };
 restore();
-
-(() => {
-  const countEl = $("visitorCount");
-  if (!countEl) return;
-  const NAMESPACE = "tup-manila-procurement-scheduler";
-  const KEY = "site-visits";
-  const animateCount = (target) => {
-    const duration = 900;
-    let start = null;
-    const tick = (timestamp) => {
-      if (start === null) start = timestamp;
-      const progress = Math.min((timestamp - start) / duration, 1);
-      const eased = 1 - Math.pow(1 - progress, 3);
-      countEl.textContent = Math.floor(eased * target).toLocaleString();
-      if (progress < 1) requestAnimationFrame(tick);
-      else countEl.textContent = target.toLocaleString();
-    };
-    requestAnimationFrame(tick);
-  };
-  fetch(`https://abacus.jasoncameron.dev/hit/${NAMESPACE}/${KEY}`)
-    .then((res) => {
-      if (!res.ok) throw new Error("Counter unavailable");
-      return res.json();
-    })
-    .then((data) => animateCount(data.value))
-    .catch(() => {
-      countEl.textContent = "—";
-      countEl.classList.add("visitor-count-error");
-    });
-})();

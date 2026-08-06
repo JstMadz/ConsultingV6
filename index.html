@@ -5,14 +5,14 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="theme-color" content="#8b1538" />
     <title>Procurement Scheduler | TUP Manila</title>
-    <link rel="icon" type="image/png" href="tup_logo.png" />
-    <link rel="stylesheet" href="landing.css" />
+    <link rel="icon" type="image/png" href="assets/images/tup-logo.png" />
+    <link rel="stylesheet" href="assets/css/landing.css" />
   </head>
   <body>
     <main class="landing-shell">
       <header class="site-header">
         <img
-          src="tup_logo.png"
+          src="assets/images/tup-logo.png"
           alt="Technological University of the Philippines logo"
         />
         <div>
@@ -22,7 +22,7 @@
       </header>
       <section class="hero" aria-labelledby="schedulerChoice">
         <p class="eyebrow">Procurement planning tools</p>
-        <h2 id="schedulerChoice">Choose a scheduler</h2>
+        <h2 id="schedulerChoice">Choose a tool</h2>
         <p class="intro">
           Select the procurement type to create a compliant, presentable
           procurement schedule.
@@ -55,6 +55,24 @@
               ><span class="card-action"
                 >Open Goods &amp; Services Scheduler
                 <b aria-hidden="true">↗</b></span
+              ></span
+            >
+          </a>
+          <a
+            class="scheduler-card ppmp-card"
+            href="https://tupngpappmp.netlify.app/"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            <span class="card-icon" aria-hidden="true">📋</span>
+            <span class="card-content"
+              ><strong>Project Procurement Management Plan (PPMP)</strong
+              ><span
+                >Create, manage, and consolidate PPMPs with consistent budget
+                calculation and standardized formatting across implementing
+                units.</span
+              ><span class="card-action"
+                >Open PPMP Web Application <b aria-hidden="true">↗</b></span
               ></span
             >
           </a>
@@ -103,36 +121,6 @@
         </div>
       </footer>
     </main>
-    <script>
-      (() => {
-        const countEl = document.getElementById("visitorCount");
-        if (!countEl) return;
-        const NAMESPACE = "tup-manila-procurement-scheduler";
-        const KEY = "site-visits";
-        const animateCount = (target) => {
-          const duration = 900;
-          let start = null;
-          const tick = (timestamp) => {
-            if (start === null) start = timestamp;
-            const progress = Math.min((timestamp - start) / duration, 1);
-            const eased = 1 - Math.pow(1 - progress, 3);
-            countEl.textContent = Math.floor(eased * target).toLocaleString();
-            if (progress < 1) requestAnimationFrame(tick);
-            else countEl.textContent = target.toLocaleString();
-          };
-          requestAnimationFrame(tick);
-        };
-        fetch(`https://abacus.jasoncameron.dev/hit/${NAMESPACE}/${KEY}`)
-          .then((res) => {
-            if (!res.ok) throw new Error("Counter unavailable");
-            return res.json();
-          })
-          .then((data) => animateCount(data.value))
-          .catch(() => {
-            countEl.textContent = "—";
-            countEl.classList.add("visitor-count-error");
-          });
-      })();
-    </script>
+    <script src="assets/js/visitor-counter.js"></script>
   </body>
 </html>
