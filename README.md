@@ -4,7 +4,7 @@
 
 ### Based on the 2016 Revised IRR of Republic Act No. 9184 (Annex "C")
 
-A web-based procurement scheduling system for **Consulting Services** that automatically generates compliant procurement timelines while considering weekends, holidays, and procurement regulations.
+A web-based procurement scheduling system for **Consulting Services** that automatically generates compliant procurement timelines while considering weekends, holidays, and procurement regulations. It is one of three procurement tools reachable from the project's landing page.
 
 ---
 
@@ -12,7 +12,7 @@ A web-based procurement scheduling system for **Consulting Services** that autom
 ![CSS3](https://img.shields.io/badge/CSS3-1572B6?style=for-the-badge&logo=css3&logoColor=white)
 ![JavaScript](https://img.shields.io/badge/JavaScript-F7DF1E?style=for-the-badge&logo=javascript&logoColor=black)
 ![Responsive](https://img.shields.io/badge/Responsive-Yes-success?style=for-the-badge)
-![Version](https://img.shields.io/badge/Version-1.0-blue?style=for-the-badge)
+![Version](https://img.shields.io/badge/Version-2.0-blue?style=for-the-badge)
 ![Status](https://img.shields.io/badge/Status-Active-success?style=for-the-badge)
 
 </div>
@@ -22,6 +22,7 @@ A web-based procurement scheduling system for **Consulting Services** that autom
 # Table of Contents
 
 - [Overview](#overview)
+- [Related Procurement Tools](#related-procurement-tools)
 - [Features](#features)
 - [Procurement Activities](#procurement-activities)
 - [System Workflow](#system-workflow)
@@ -41,6 +42,20 @@ A web-based procurement scheduling system for **Consulting Services** that autom
 The **Consulting Services Procurement Scheduler** is a browser-based application designed to assist Procurement Management Offices (PMOs), Bids and Awards Committees (BACs), faculty researchers, and government agencies in preparing procurement schedules that comply with the **2016 Revised Implementing Rules and Regulations (IRR) of Republic Act No. 9184, Annex "C"**.
 
 The system automates procurement scheduling, minimizes manual computation errors, skips weekends and holidays, validates mandatory procurement timelines, and generates professional printable reports.
+
+Opening [`index.html`](index.html) loads a landing page that lets users choose between this scheduler and two companion procurement tools — see [Related Procurement Tools](#related-procurement-tools).
+
+---
+
+# Related Procurement Tools
+
+The landing page (`index.html`) is the entry point for a small suite of TUP Manila procurement tools:
+
+| Tool | Description | Link |
+| --- | --- | --- |
+| **Consulting Services Procurement Scheduler** | This application — generates RA 9184/RA 12009-compliant schedules for consulting services. | [`consulting.html`](consulting.html) |
+| **Goods, Services, and Infrastructure Scheduler** | A companion scheduler for goods, services, and infrastructure procurement. | [goodsscheduler.netlify.app](https://goodsscheduler.netlify.app/) |
+| **Project Procurement Management Plan (PPMP) Web Application** | A centralized platform for creating, managing, and consolidating Project Procurement Management Plans, ensuring consistency, accurate budget calculation, and standardized formatting across all implementing units. | [tupngpappmp.netlify.app](https://tupngpappmp.netlify.app/) |
 
 ---
 
@@ -138,14 +153,17 @@ Supports:
 
 ---
 
-## 📱 Responsive Design
+## 📱 Fully Responsive, Fit-to-Screen Layout
 
-Compatible with:
+The landing page and scheduler scale fluidly to the viewport instead of relying on fixed breakpoints:
 
-- Desktop
-- Laptop
-- Tablet
-- Mobile Devices
+- Fluid spacing, type, and card sizing using `vmin`/`dvh`-based scaling, so layout adapts to both narrow **and** short screens
+- No horizontal overflow on any screen width
+- Verified across:
+  - Desktop and ultrawide monitors
+  - Laptops
+  - Tablets
+  - Mobile devices (portrait and landscape)
 
 ---
 
@@ -173,6 +191,12 @@ The scheduler currently supports:
 # System Workflow
 
 ```text
+Open Landing Page
+          │
+          ▼
+Choose Consulting Services Scheduler
+          │
+          ▼
 Input Project Information
           │
           ▼
@@ -201,12 +225,12 @@ Print / Export PDF
 
 # Screenshots
 
-Add screenshots inside the **images** folder.
+Add screenshots inside a **docs/images** folder (kept separate from the app's own `assets/images`).
 
 Example:
 
 ```
-images/
+docs/images/
 │
 ├── home.png
 ├── generated-schedule.png
@@ -219,15 +243,15 @@ Then display them:
 ```markdown
 ## Home Page
 
-![Home](images/home.png)
+![Home](docs/images/home.png)
 
 ## Generated Schedule
 
-![Schedule](images/generated-schedule.png)
+![Schedule](docs/images/generated-schedule.png)
 
 ## Print Preview
 
-![Print](images/print-preview.png)
+![Print](docs/images/print-preview.png)
 ```
 
 ---
@@ -237,10 +261,16 @@ Then display them:
 Clone the repository.
 
 ```bash
-git clone https://github.com/yourusername/consulting-procurement-scheduler.git
+git clone https://github.com/JstMadz/ConsultingV6.git
 ```
 
-Open the project folder.
+Open the project folder and launch the landing page.
+
+```
+index.html
+```
+
+Or open the scheduler directly.
 
 ```
 consulting.html
@@ -255,14 +285,15 @@ Recommended:
 
 # How to Use
 
-1. Enter the Project Title.
-2. Enter the Approved Budget for the Contract (ABC).
-3. Select the Starting Activity.
-4. Select the Start Date.
-5. Add holidays if necessary.
-6. Click **Generate Schedule**.
-7. Adjust working days if needed.
-8. Print or Export to PDF.
+1. Open `index.html` and select **Consulting Services**.
+2. Enter the Project Title.
+3. Enter the Approved Budget for the Contract (ABC).
+4. Select the Starting Activity.
+5. Select the Start Date.
+6. Add holidays if necessary.
+7. Click **Add project schedule**.
+8. Adjust working days if needed.
+9. Print or Export to PDF.
 
 ---
 
@@ -274,7 +305,6 @@ ConsultingV6
 ├── index.html              # Landing page / scheduler picker
 ├── consulting.html         # Consulting Services Procurement Scheduler
 ├── README.md
-├── LICENSE
 │
 └── assets
     ├── css
@@ -292,20 +322,17 @@ ConsultingV6
 # Technology Stack
 
 - HTML5
-- CSS3
+- CSS3 (fluid, `vmin`/`dvh`-based responsive layout)
 - JavaScript (Vanilla)
 - Local Storage API
 
-No external libraries required.
+No external libraries or build tooling required.
 
 ---
 
 # Future Improvements
 
 - Support for Republic Act No. 12009 (New Government Procurement Act)
-- Goods Procurement Scheduler
-- Infrastructure Procurement Scheduler
-- Non-Consulting Services Scheduler
 - Automatic Gantt Chart
 - Excel Export
 - Native PDF Generation
