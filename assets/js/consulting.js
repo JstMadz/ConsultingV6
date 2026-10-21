@@ -17,6 +17,7 @@ const activities = [
 const $ = (id) => document.getElementById(id);
 let holidays = [],
   projects = [];
+let calendarMonth = new Date();
 const localDate = (v) => {
     const [y, m, d] = v.split("-").map(Number);
     return new Date(y, m - 1, d);
@@ -126,35 +127,48 @@ function validate() {
     (!start || !end || end > start)
   );
 }
+function renderCalendar() {
+  const year = calendarMonth.getFullYear();
+  const month = calendarMonth.getMonth();
+  $("holidayCalendarMonth").textContent = calendarMonth.toLocaleDateString("en-PH", {
+    month: "long",
+    year: "numeric",
+  });
+  const offset = new Date(year, month, 1, 12).getDay();
+  const totalDays = new Date(year, month + 1, 0, 12).getDate();
+  const cells = Array(offset).fill(null);
+  for (let day = 1; day <= totalDays; day++) cells.push(day);
+  while (cells.length % 7) cells.push(null);
+  $("holidayCalendarDays").innerHTML = cells
+    .map((day) => {
+      if (!day) return '<span class="calendar-empty" aria-hidden="true"></span>';
+      const date = isoDate(new Date(year, month, day, 12));
+      const selected = holidays.includes(date);
+      return `<button class="calendar-day${selected ? " is-selected" : ""}" type="button" data-date="${date}" aria-pressed="${selected}" aria-label="${formatDate(localDate(date))}${selected ? ", selected" : ""}">${day}</button>`;
+    })
+    .join("");
+}
 function renderHolidays() {
   const list = $("holidayList");
   list.innerHTML = holidays.length
-    ? `<p class="field-hint">${holidays.length} non-working date${holidays.length === 1 ? "" : "s"} added.</p><ul>${holidays.map((d) => `<li>${formatDate(localDate(d))}<button class="remove-holiday" data-date="${d}" type="button" aria-label="Remove ${formatDate(localDate(d))}">×</button></li>`).join("")}</ul>`
-    : '<p class="field-hint">No additional non-working dates. Weekends are always excluded.</p>';
+    ? `<p class="holiday-summary">${holidays.length} non-working date${holidays.length === 1 ? "" : "s"} selected</p><ul>${holidays.map((d) => `<li>${formatDate(localDate(d))}<button class="remove-holiday" data-date="${d}" type="button" aria-label="Remove ${formatDate(localDate(d))}">×</button></li>`).join("")}</ul>`
+    : '<p class="holiday-empty">No dates selected. Weekends are always excluded.</p>';
+  $("clearHolidaysBtn").disabled = holidays.length === 0;
   list.querySelectorAll("button").forEach(
-    (b) =>
-      (b.onclick = () => {
-        holidays = holidays.filter((d) => d !== b.dataset.date);
-        persist();
-        renderHolidays();
-        renderProjects();
-      }),
+    (button) =>
+      (button.onclick = () => toggleHoliday(button.dataset.date)),
   );
 }
-function addHoliday() {
-  const d = $("holidayPicker").value;
-  if (!validDate(d))
-    return fieldError("holidayPicker", "Choose a valid date to add.");
-  if (holidays.includes(d))
-    return fieldError("holidayPicker", "That date is already included.");
-  holidays.push(d);
-  holidays.sort();
-  $("holidayPicker").value = "";
-  fieldError("holidayPicker", "");
+function toggleHoliday(date) {
+  const wasSelected = holidays.includes(date);
+  holidays = wasSelected
+    ? holidays.filter((item) => item !== date)
+    : [...holidays, date].sort();
   persist();
   renderHolidays();
+  renderCalendar();
   renderProjects();
-  status("Non-working date added.");
+  status(wasSelected ? "Non-working date removed." : "Non-working date added.");
 }
 function calculate(p) {
   let current = localDate(p.startDate),
@@ -177,15 +191,193 @@ function renderCard(p) {
   const start = localDate(p.startDate),
     rows = calculate(p),
     last = rows.at(-1);
-  return `<article class="project-schedule" data-id="${p.id}"><header class="print-project-header"><img src="assets/images/tup-logo.png" alt=""><div><p>Technological University of the Philippines – Manila</p><strong>Consulting Services Procurement Scheduler</strong><span>2016 Revised IRR of RA 9184 · Annex “C”</span></div></header><div class="schedule-heading"><div><p class="eyebrow">Generated procurement timeline</p><h3>${escape(p.title)}</h3></div><button type="button" class="button button-danger remove-project" data-id="${p.id}">Remove project</button></div><div class="display-details"><div><span class="detail-label">Project title</span><span class="detail-value">${escape(p.title)}</span></div><div><span class="detail-label">Approved Budget for the Contract</span><span class="detail-value">${peso(p.budget)}</span></div><div><span class="detail-label">Start date and time</span><span class="detail-value">${formatDate(start)} · ${formatTime(p.startTime)}</span></div><div><span class="detail-label">End time</span><span class="detail-value">${formatTime(p.endTime)}</span></div></div><div class="table-container" tabindex="0"><table><thead><tr><th>Procurement activity</th><th>Minimum days</th><th>Maximum days</th><th>Additional days</th><th>Scheduled date</th><th>Elapsed calendar days</th></tr></thead><tbody>${rows.map((r) => `<tr><td>${r.a.name}</td><td>${r.a.min}</td><td>${r.a.max}</td><td><input class="adjust-input" type="number" min="0" max="3650" step="1" value="${r.extra}" data-id="${p.id}" data-index="${r.i}" aria-label="Additional days for ${r.a.name}"><span class="row-error"></span></td><td>${formatDate(r.d)}</td><td>${between(start, r.d)}</td></tr>`).join("")}</tbody><tfoot><tr><th colspan="5">Total calendar days</th><td>${between(start, last.d).toLocaleString("en-PH")}</td></tr></tfoot></table></div><footer class="schedule-footer"><div class="signature"><p>Prepared by:</p><div class="signature-line"></div><p class="signature-note">Name and signature</p></div><p class="printed-date">Created: ${formatDateTime(new Date(p.createdAt))}<br>Printed: <span class="print-time">${formatDateTime()}</span></p></footer></article>`;
+  return `<article class="project-schedule" data-id="${p.id}">
+    <header class="schedule-brand">
+      <img src="assets/images/tup-logo.png" alt="">
+      <div>
+        <p class="university-name">Technological University of the Philippines – Manila</p>
+        <p class="document-name">Consulting Services Procurement Schedule · 2016 Revised IRR of RA 9184</p>
+      </div>
+    </header>
+    <div class="schedule-head">
+      <div class="schedule-title-row">
+        <h3>${escape(p.title)}</h3>
+        <button type="button" class="button button-danger remove-project" data-id="${p.id}">Remove project</button>
+      </div>
+      <div class="metadata">
+        <span><strong>ABC:</strong> ${peso(p.budget)}</span>
+        <span><strong>Schedule time:</strong> ${formatTime(p.startTime)}–${formatTime(p.endTime)}</span>
+        <span><strong>Anchor date:</strong> ${formatDate(start)}</span>
+        <span><strong>Starting activity:</strong> ${escape(activities[p.startActivity].name)}</span>
+      </div>
+    </div>
+    <div class="table-container" role="region" tabindex="0" aria-label="Schedule details. Scroll horizontally to view all columns.">
+      <table class="schedule-table">
+        <thead><tr><th>Procurement activity</th><th>Minimum days</th><th>Maximum days</th><th>Additional days</th><th>Scheduled date</th><th>Elapsed calendar days</th></tr></thead>
+        <tbody>${rows.map((r) => `<tr><td>${r.a.name}</td><td>${r.a.min}</td><td>${r.a.max}</td><td><input class="adjust-input" type="number" min="0" max="3650" step="1" value="${r.extra}" data-id="${p.id}" data-index="${r.i}" aria-label="Additional days for ${r.a.name}"><span class="row-error"></span></td><td>${formatDate(r.d)}</td><td>${between(start, r.d)}</td></tr>`).join("")}</tbody>
+        <tfoot><tr class="total-days-row"><th colspan="5">Total calendar days</th><td>${between(start, last.d).toLocaleString("en-PH")}</td></tr></tfoot>
+      </table>
+    </div>
+    <footer class="schedule-footer">
+      <div class="signatory"><p>Prepared by:</p><div class="signature-line"></div><strong>Signature over printed name</strong><span>Procurement Office</span></div>
+      <div class="document-timestamps"><p>Created: ${formatDateTime(new Date(p.createdAt))}</p><p>Printed: <span class="print-time">${formatDateTime()}</span></p></div>
+    </footer>
+  </article>`;
+}
+const PAPER = {
+  a4: { width: 210, height: 297, format: "a4" },
+  folio: { width: 215.9, height: 330.2, format: [215.9, 330.2] },
+};
+const PRINT_MARGIN_MM = 5;
+const PDF_MARGIN_MM = 4;
+const MM_TO_PX = 96 / 25.4;
+function selectedPaper() {
+  return PAPER[$("paperSize").value] || PAPER.a4;
+}
+function fitScheduleToPage(schedule, paper, margin) {
+  const width = (paper.width - margin * 2) * MM_TO_PX;
+  const height = (paper.height - margin * 2 - 2) * MM_TO_PX;
+  const maxScale = 1.3;
+  schedule.style.zoom = "";
+  schedule.style.width = `${width}px`;
+  const naturalHeight = schedule.scrollHeight;
+  let low = naturalHeight > height ? 0.5 : 1;
+  let high = naturalHeight > height ? 1 : maxScale;
+  for (let i = 0; i < 12; i++) {
+    const scale = (low + high) / 2;
+    schedule.style.zoom = String(scale);
+    schedule.style.width = `${width / scale}px`;
+    if (schedule.scrollHeight * scale <= height) low = scale;
+    else high = scale;
+  }
+  if (Math.abs(low - 1) < 0.005) {
+    schedule.style.zoom = "";
+    schedule.style.width = `${width}px`;
+    return;
+  }
+  schedule.style.zoom = String(low);
+  schedule.style.width = `${width / low}px`;
+}
+function resetScheduleFit() {
+  document.querySelectorAll(".project-schedule").forEach((schedule) => {
+    schedule.style.zoom = "";
+    schedule.style.width = "";
+  });
+}
+function stampOutputTime() {
+  const printedAt = formatDateTime();
+  document.querySelectorAll(".print-time").forEach((item) => {
+    item.textContent = printedAt;
+  });
+}
+function printSchedules() {
+  if (!projects.length) return;
+  const paper = selectedPaper();
+  stampOutputTime();
+  $("scheduleList").classList.add("compact-output");
+  const pageStyle = document.createElement("style");
+  pageStyle.textContent = `@page { size: ${paper.width}mm ${paper.height}mm; margin: ${PRINT_MARGIN_MM}mm; }`;
+  document.head.appendChild(pageStyle);
+  document.querySelectorAll(".project-schedule").forEach((schedule) =>
+    fitScheduleToPage(schedule, paper, PRINT_MARGIN_MM),
+  );
+  window.addEventListener(
+    "afterprint",
+    () => {
+      $("scheduleList").classList.remove("compact-output");
+      resetScheduleFit();
+      pageStyle.remove();
+    },
+    { once: true },
+  );
+  window.print();
+}
+function fitCanvasToPage(canvas, ratio) {
+  const width = Math.max(canvas.width, Math.ceil(canvas.height / ratio) + 1);
+  if (width === canvas.width) return canvas;
+  const fitted = document.createElement("canvas");
+  fitted.width = width;
+  fitted.height = canvas.height;
+  const context = fitted.getContext("2d");
+  context.fillStyle = "#fff";
+  context.fillRect(0, 0, width, canvas.height);
+  context.drawImage(canvas, Math.floor((width - canvas.width) / 2), 0);
+  return fitted;
+}
+async function downloadPdf() {
+  if (!projects.length) return;
+  if (typeof window.html2pdf !== "function")
+    return status("PDF download is unavailable. Use Print all and choose Save as PDF.", true);
+  const paper = selectedPaper();
+  const options = {
+    margin: PDF_MARGIN_MM,
+    filename: "tup-consulting-procurement-schedules.pdf",
+    image: { type: "jpeg", quality: 0.98 },
+    html2canvas: {
+      scale: 2,
+      onclone: (clonedDocument) => {
+        clonedDocument
+          .querySelectorAll(".html2pdf__overlay")
+          .forEach((overlay) => (overlay.style.opacity = "1"));
+      },
+    },
+    jsPDF: { unit: "mm", format: paper.format, orientation: "portrait" },
+  };
+  const ratio = (paper.height - PDF_MARGIN_MM * 2) / (paper.width - PDF_MARGIN_MM * 2);
+  const canvases = [];
+  stampOutputTime();
+  try {
+    for (const schedule of document.querySelectorAll(".project-schedule")) {
+      const page = document.createElement("div");
+      page.className = "schedule-list compact-output";
+      page.id = "pdf-export-source";
+      page.setAttribute("aria-hidden", "true");
+      const scheduleCopy = schedule.cloneNode(true);
+      page.appendChild(scheduleCopy);
+      document.body.appendChild(page);
+      page.style.width = `${(paper.width - PDF_MARGIN_MM * 2) * MM_TO_PX}px`;
+      page.style.margin = "0";
+      page.style.padding = "0";
+      page.style.overflow = "visible";
+      fitScheduleToPage(scheduleCopy, paper, PDF_MARGIN_MM);
+      try {
+        const canvas = await window
+          .html2pdf()
+          .set(options)
+          .from(page)
+          .toCanvas()
+          .get("canvas");
+        canvases.push(fitCanvasToPage(canvas, ratio));
+      } finally {
+        page.remove();
+      }
+    }
+    let worker = window
+      .html2pdf()
+      .set(options)
+      .from(canvases[0], "canvas")
+      .toPdf();
+    canvases.slice(1).forEach((canvas) => {
+      worker = worker
+        .get("pdf")
+        .then((pdf) => pdf.addPage())
+        .from(canvas, "canvas")
+        .toPdf();
+    });
+    await worker.save();
+  } catch (error) {
+    console.error(error);
+    status("PDF export could not be completed. Please try again.", true);
+  }
 }
 function renderProjects() {
   const list = $("scheduleList");
   list.innerHTML = projects.map(renderCard).join("");
   $("projectSchedules").hidden = !projects.length;
   $("projectCount").textContent =
-    `${projects.length} project${projects.length === 1 ? "" : "s"} ready to print`;
+    `${projects.length} project${projects.length === 1 ? "" : "s"} ready to print or save as PDF`;
   $("printBtn").disabled = !projects.length;
+  $("downloadPdfBtn").disabled = !projects.length;
   list.querySelectorAll(".remove-project").forEach(
     (b) =>
       (b.onclick = () => {
@@ -271,10 +463,30 @@ function restore() {
     localStorage.removeItem("consultingProjects");
   }
   renderHolidays();
+  renderCalendar();
   renderProjects();
 }
 $("schedulerForm").onsubmit = addProject;
-$("addHolidayBtn").onclick = addHoliday;
+$("holidayPrevMonth").onclick = () => {
+  calendarMonth = new Date(calendarMonth.getFullYear(), calendarMonth.getMonth() - 1, 1, 12);
+  renderCalendar();
+};
+$("holidayNextMonth").onclick = () => {
+  calendarMonth = new Date(calendarMonth.getFullYear(), calendarMonth.getMonth() + 1, 1, 12);
+  renderCalendar();
+};
+$("holidayCalendarDays").onclick = (event) => {
+  const day = event.target.closest("button[data-date]");
+  if (day) toggleHoliday(day.dataset.date);
+};
+$("clearHolidaysBtn").onclick = () => {
+  holidays = [];
+  persist();
+  renderHolidays();
+  renderCalendar();
+  renderProjects();
+  status("Non-working dates cleared.");
+};
 $("saveHolidaysBtn").onclick = () => {
   const a = document.createElement("a");
   a.href = URL.createObjectURL(
@@ -301,6 +513,7 @@ $("loadHolidaysBtn").onclick = () => {
       holidays = [...new Set(d)].sort();
       persist();
       renderHolidays();
+      renderCalendar();
       renderProjects();
       status("Holiday list loaded.");
     } catch {
@@ -310,12 +523,8 @@ $("loadHolidaysBtn").onclick = () => {
   r.onerror = () => status("The selected file could not be read.", true);
   r.readAsText(f);
 };
-$("printBtn").onclick = () => {
-  document
-    .querySelectorAll(".print-time")
-    .forEach((n) => (n.textContent = formatDateTime()));
-  window.print();
-};
+$("printBtn").onclick = printSchedules;
+$("downloadPdfBtn").onclick = downloadPdf;
 $("projectBudget").onblur = () => {
   const n = money($("projectBudget").value);
   if (n !== null) $("projectBudget").value = peso(n).replace("₱", "").trim();

@@ -7,6 +7,7 @@
     <title>Consulting Services Procurement Scheduler | TUP Manila</title>
     <link rel="icon" type="image/png" href="assets/images/tup-logo.png" />
     <link rel="stylesheet" href="assets/css/consulting.css" />
+    <script defer src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.9.3/html2pdf.bundle.min.js"></script>
   </head>
   <body class="scheduler-page">
     <main class="app-shell">
@@ -35,140 +36,107 @@
           aria-live="polite"
         ></div>
         <form id="schedulerForm" novalidate>
-          <fieldset>
-            <legend>Project information</legend>
+          <fieldset class="form-panel">
+            <legend><span class="step-marker">Step 1</span><span>Project information</span></legend>
             <div class="form-grid project-grid">
               <div class="field">
-                <label for="projectTitle">Project title *</label
-                ><input
-                  id="projectTitle"
-                  type="text"
-                  maxlength="180"
-                  placeholder="e.g., Feasibility Study for Campus Development"
-                  required
-                />
-                <p id="projectTitleError" class="field-error"></p>
+                <label for="projectTitle">Project title <span aria-hidden="true">*</span></label>
+                <input id="projectTitle" type="text" maxlength="180" placeholder="e.g., Feasibility Study for Campus Development" required aria-describedby="projectTitleError" />
+                <p id="projectTitleError" class="field-error" aria-live="polite"></p>
               </div>
               <div class="field">
-                <label for="projectBudget"
-                  >Approved Budget for the Contract (ABC) *</label
-                >
+                <label for="projectBudget">Approved budget (ABC) <span aria-hidden="true">*</span></label>
                 <div class="currency-input">
-                  <span>₱</span
-                  ><input
-                    id="projectBudget"
-                    type="text"
-                    inputmode="decimal"
-                    placeholder="1,000,000.00"
-                    required
-                  />
+                  <span aria-hidden="true">₱</span>
+                  <input id="projectBudget" type="text" inputmode="decimal" placeholder="1,000,000.00" required aria-label="Approved Budget for the Contract (ABC)" aria-describedby="projectBudgetHint projectBudgetError" />
                 </div>
-                <p class="field-hint">
-                  Enter a value from ₱0.00 to ₱999,999,999,999.99.
-                </p>
-                <p id="projectBudgetError" class="field-error"></p>
+                <p id="projectBudgetHint" class="field-hint">Enter a value from ₱0.00 to ₱999,999,999,999.99.</p>
+                <p id="projectBudgetError" class="field-error" aria-live="polite"></p>
               </div>
             </div>
           </fieldset>
-          <fieldset>
-            <legend>Schedule setup</legend>
-            <div class="form-grid">
+
+          <fieldset class="form-panel">
+            <legend><span class="step-marker">Step 2</span><span>Schedule setup</span></legend>
+            <div class="form-grid schedule-grid">
               <div class="field">
-                <label for="startActivity">Starting activity *</label
-                ><select id="startActivity" required></select>
-                <p class="field-hint">
-                  Activities before this point are excluded.
-                </p>
+                <label for="startActivity">Starting activity <span aria-hidden="true">*</span></label>
+                <select id="startActivity" required></select>
+                <p class="field-hint">Activities before this point are excluded.</p>
               </div>
               <div class="field">
-                <label for="startDate">Start date *</label
-                ><input id="startDate" type="date" required />
-                <p id="startDateError" class="field-error"></p>
+                <label for="startDate">Start date <span aria-hidden="true">*</span></label>
+                <input id="startDate" type="date" required aria-describedby="startDateError" />
+                <p id="startDateError" class="field-error" aria-live="polite"></p>
               </div>
               <div class="field">
-                <label for="startTime"
-                  >Start time <span class="optional">(optional)</span></label
-                ><input id="startTime" type="time" />
+                <label for="startTime">Start time <span class="optional">(optional)</span></label>
+                <input id="startTime" type="time" />
               </div>
               <div class="field">
-                <label for="endTime"
-                  >End time <span class="optional">(optional)</span></label
-                ><input id="endTime" type="time" />
-                <p id="endTimeError" class="field-error"></p>
+                <label for="endTime">End time <span class="optional">(optional)</span></label>
+                <input id="endTime" type="time" aria-describedby="endTimeError" />
+                <p id="endTimeError" class="field-error" aria-live="polite"></p>
               </div>
             </div>
           </fieldset>
-          <fieldset>
-            <legend>Non-working dates</legend>
-            <div class="holiday-controls">
-              <div class="field">
-                <label for="holidayPicker"
-                  >Add a holiday or office closure</label
-                ><input id="holidayPicker" type="date" />
-                <p id="holidayPickerError" class="field-error"></p>
+
+          <fieldset class="form-panel holidays-panel">
+            <legend><span class="step-marker">Step 3</span><span>Non-working dates</span></legend>
+            <div class="holiday-picker-grid">
+              <div class="calendar-card">
+                <div class="calendar-heading">
+                  <button id="holidayPrevMonth" class="calendar-nav" type="button" aria-label="Previous month">‹</button>
+                  <h3 id="holidayCalendarMonth" aria-live="polite"></h3>
+                  <button id="holidayNextMonth" class="calendar-nav" type="button" aria-label="Next month">›</button>
+                </div>
+                <div class="calendar-weekdays" aria-hidden="true">
+                  <span>Sun</span><span>Mon</span><span>Tue</span><span>Wed</span><span>Thu</span><span>Fri</span><span>Sat</span>
+                </div>
+                <div id="holidayCalendarDays" class="calendar-days" role="group" aria-label="Choose non-working dates"></div>
               </div>
-              <button
-                id="addHolidayBtn"
-                class="button button-outline"
-                type="button"
-              >
-                Add date
-              </button>
-            </div>
-            <div id="holidayList" class="holiday-list" aria-live="polite"></div>
-            <div class="file-actions">
-              <button
-                id="saveHolidaysBtn"
-                class="button button-quiet"
-                type="button"
-              >
-                Download holiday list</button
-              ><label class="file-label"
-                >Choose holiday list
-                <input
-                  id="loadHolidaysFile"
-                  type="file"
-                  accept="application/json,.json" /></label
-              ><button
-                id="loadHolidaysBtn"
-                class="button button-quiet"
-                type="button"
-              >
-                Load selected list
-              </button>
+              <div class="selected-holidays">
+                <div class="selected-holidays-heading">
+                  <div>
+                    <h3>Chosen non-working days</h3>
+                    <p class="field-hint">Select multiple dates on the calendar.</p>
+                  </div>
+                  <button id="clearHolidaysBtn" class="button button-text" type="button" disabled>Clear all</button>
+                </div>
+                <div id="holidayList" class="holiday-list" aria-live="polite"></div>
+                <div class="file-actions">
+                  <button id="saveHolidaysBtn" class="button button-quiet" type="button">Export dates</button>
+                  <label class="file-label" for="loadHolidaysFile">Import dates</label>
+                  <input id="loadHolidaysFile" type="file" accept="application/json,.json" hidden />
+                  <button id="loadHolidaysBtn" class="button button-quiet" type="button">Load selected file</button>
+                </div>
+              </div>
             </div>
           </fieldset>
-          <div class="button-row">
-            <button
-              id="generateBtn"
-              class="button button-primary"
-              type="submit"
-            >
-              Add project schedule</button
-            ><button
-              id="printBtn"
-              class="button button-secondary"
-              type="button"
-              disabled
-            >
-              Print or save as PDF
-            </button>
+
+          <div class="button-row form-actions">
+            <button id="generateBtn" class="button button-primary" type="submit">Add project schedule</button>
           </div>
         </form>
-        <section
-          id="projectSchedules"
-          class="project-schedules"
-          hidden
-          aria-labelledby="projectSchedulesHeading"
-        >
-          <div class="schedule-heading">
+        <section id="projectSchedules" class="project-schedules" hidden aria-labelledby="projectSchedulesHeading">
+          <div class="output-toolbar">
             <div>
-              <p class="eyebrow">Generated procurement timelines</p>
+              <p class="eyebrow">Output</p>
               <h2 id="projectSchedulesHeading">Project schedules</h2>
+              <p id="projectCount" class="generated-at"></p>
             </div>
-            <p id="projectCount" class="generated-at"></p>
+            <div class="button-row export-actions">
+              <label class="paper-size-control" for="paperSize">Paper size
+                <select id="paperSize">
+                  <option value="a4">A4</option>
+                  <option value="folio">8.5 × 13 in (Folio)</option>
+                </select>
+              </label>
+              <button id="downloadPdfBtn" class="button button-primary" type="button" disabled>Download PDF</button>
+              <button id="printBtn" class="button button-secondary" type="button" disabled>Print all</button>
+            </div>
           </div>
-          <div id="scheduleList"></div>
+          <div id="scheduleList" class="schedule-list"></div>
         </section>
       </section>
     </main>
