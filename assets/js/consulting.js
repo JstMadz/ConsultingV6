@@ -16,7 +16,8 @@ const activities = [
 ].map(([name, min, max]) => ({ name, min, max }));
 const $ = (id) => document.getElementById(id);
 let holidays = [],
-  projects = [];
+  projects = [],
+  editingProjectId = null;
 let calendarMonth = new Date();
 const localDate = (v) => {
     const [y, m, d] = v.split("-").map(Number);
@@ -202,7 +203,10 @@ function renderCard(p) {
     <div class="schedule-head">
       <div class="schedule-title-row">
         <h3>${escape(p.title)}</h3>
+        <div class="project-actions">
+          <button type="button" class="button button-outline edit-project" data-id="${p.id}">Edit project</button>
         <button type="button" class="button button-danger remove-project" data-id="${p.id}">Remove project</button>
+        </div>
       </div>
       <div class="metadata">
         <span><strong>ABC:</strong> ${peso(p.budget)}</span>
@@ -381,11 +385,15 @@ function renderProjects() {
   list.querySelectorAll(".remove-project").forEach(
     (b) =>
       (b.onclick = () => {
+        if (editingProjectId === b.dataset.id) resetProjectEdit();
         projects = projects.filter((p) => p.id !== b.dataset.id);
         persist();
         renderProjects();
         status("Project schedule removed.");
       }),
+  );
+  list.querySelectorAll(".edit-project").forEach(
+    (b) => (b.onclick = () => beginProjectEdit(b.dataset.id)),
   );
   list.querySelectorAll(".adjust-input").forEach(
     (input) =>
@@ -412,25 +420,58 @@ function addProject(e) {
       "Review the highlighted fields before adding this project.",
       true,
     );
+  const existing = projects.find((project) => project.id === editingProjectId);
   const p = {
-    id: crypto.randomUUID
+    id: editingProjectId || (crypto.randomUUID
       ? crypto.randomUUID()
-      : `${Date.now()}-${Math.random()}`,
+      : `${Date.now()}-${Math.random()}`),
     title: $("projectTitle").value.trim(),
     budget: money($("projectBudget").value),
     startActivity: +$("startActivity").value,
     startDate: $("startDate").value,
     startTime: $("startTime").value,
     endTime: $("endTime").value,
-    adjustments: {},
-    createdAt: new Date().toISOString(),
+    adjustments: existing?.adjustments || {},
+    createdAt: existing?.createdAt || new Date().toISOString(),
   };
-  projects.push(p);
+  const wasEditing = Boolean(editingProjectId);
+  projects = wasEditing
+    ? projects.map((project) => (project.id === editingProjectId ? p : project))
+    : [...projects, p];
+  editingProjectId = null;
   persist();
   renderProjects();
   $("schedulerForm").reset();
   $("startActivity").value = "0";
-  status(`Added “${p.title}”. You can now enter another project.`);
+  $("generateBtn").textContent = "Add project schedule";
+  $("cancelEditBtn").hidden = true;
+  status(wasEditing ? `Updated “${p.title}”.` : `Added “${p.title}”. You can now enter another project.`);
+}
+function beginProjectEdit(id) {
+  const project = projects.find((item) => item.id === id);
+  if (!project) return;
+  editingProjectId = id;
+  $("projectTitle").value = project.title;
+  $("projectBudget").value = Number(project.budget).toLocaleString("en-PH", {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  });
+  $("startActivity").value = String(project.startActivity);
+  $("startDate").value = project.startDate;
+  $("startTime").value = project.startTime || "";
+  $("endTime").value = project.endTime || "";
+  $("generateBtn").textContent = "Save changes";
+  $("cancelEditBtn").hidden = false;
+  status(`Editing “${project.title}”. Update the fields and save your changes.`);
+  $("schedulerForm").scrollIntoView({ behavior: "smooth", block: "start" });
+  $("projectTitle").focus({ preventScroll: true });
+}
+function resetProjectEdit() {
+  editingProjectId = null;
+  $("schedulerForm").reset();
+  $("startActivity").value = "0";
+  $("generateBtn").textContent = "Add project schedule";
+  $("cancelEditBtn").hidden = true;
 }
 function restore() {
   $("startActivity").innerHTML = activities
@@ -467,6 +508,10 @@ function restore() {
   renderProjects();
 }
 $("schedulerForm").onsubmit = addProject;
+$("cancelEditBtn").onclick = () => {
+  resetProjectEdit();
+  status("Project edit cancelled.");
+};
 $("holidayPrevMonth").onclick = () => {
   calendarMonth = new Date(calendarMonth.getFullYear(), calendarMonth.getMonth() - 1, 1, 12);
   renderCalendar();

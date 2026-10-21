@@ -311,6 +311,16 @@ input[aria-invalid="true"] {
   margin: 0;
   font-size: 1.2em;
 }
+.project-actions {
+  display: flex;
+  flex: 0 0 auto;
+  gap: 8px;
+}
+.project-actions .button {
+  min-height: 38px;
+  padding: 7px 11px;
+  font-size: 0.8rem;
+}
 .generated-at {
   margin: 0;
   text-align: right;
@@ -683,7 +693,7 @@ tfoot th {
     margin-bottom: 8px;
   }
   .project-schedule .eyebrow,
-  .remove-project {
+.project-actions {
     display: none !important;
   }
   .display-details {
@@ -1427,6 +1437,9 @@ tfoot th {
   .compact-output .remove-project {
     display: none !important;
   }
+.compact-output .project-actions {
+  display: none !important;
+}
 
   .metadata {
     display: flex;
@@ -1829,7 +1842,7 @@ tfoot th {
   .form-status,
   .site-footer,
   .output-toolbar,
-  .remove-project {
+  .project-actions {
     display: none !important;
   }
 
