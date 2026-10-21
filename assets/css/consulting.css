@@ -2065,3 +2065,181 @@ tfoot th {
     margin: 2pt 0;
   }
 }
+
+/* Compact print and PDF table proportions. Headers wrap at word boundaries,
+   while columns stay inside the printable page width. */
+.compact-output .schedule-table {
+  width: 100% !important;
+  min-width: 0;
+  table-layout: fixed;
+}
+
+.compact-output .schedule-table th,
+.compact-output .schedule-table td {
+  overflow-wrap: normal;
+  word-break: normal;
+}
+
+.compact-output .schedule-table th:first-child,
+.compact-output .schedule-table td:first-child {
+  width: 29%;
+  min-width: 0;
+  text-align: left;
+}
+
+.compact-output .schedule-table th:nth-child(2),
+.compact-output .schedule-table td:nth-child(2),
+.compact-output .schedule-table th:nth-child(3),
+.compact-output .schedule-table td:nth-child(3) {
+  width: 10%;
+  min-width: 0;
+  text-align: center;
+}
+
+.compact-output .schedule-table th:nth-child(4),
+.compact-output .schedule-table td:nth-child(4) {
+  width: 12%;
+  min-width: 0;
+  text-align: center;
+}
+
+.compact-output .schedule-table th:nth-child(5),
+.compact-output .schedule-table td:nth-child(5) {
+  width: 22%;
+  min-width: 0;
+  text-align: left;
+}
+
+.compact-output .schedule-table th:nth-child(6),
+.compact-output .schedule-table td:nth-child(6) {
+  width: 17%;
+  min-width: 0;
+  text-align: center;
+}
+
+.compact-output .schedule-table thead th {
+  white-space: normal;
+  line-height: 1.2;
+  padding: 5pt 3pt;
+}
+
+.compact-output .schedule-table tbody td:first-child {
+  line-height: 1.25;
+}
+
+.compact-output .metadata,
+.pdf-export-source .pdf-document .metadata {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.55fr);
+  align-items: start;
+}
+
+/* Project dates sit at the left of the footer and the signing block at right. */
+.compact-output .schedule-footer {
+  display: flex;
+  flex-direction: row;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 16pt;
+}
+
+.compact-output .document-timestamps {
+  order: 1;
+  flex: 1 1 auto;
+  margin-right: auto;
+  text-align: left;
+}
+
+.compact-output .signatory {
+  order: 2;
+  flex: 0 0 min(42%, 230px);
+  min-width: 180px;
+  margin-left: auto;
+  text-align: center;
+}
+
+.compact-output .signature-line {
+  width: 100%;
+}
+
+/* The saved PDF grows type and row spacing without CSS zoom so html2canvas
+   keeps word spacing crisp as it fills the page. */
+.pdf-export-source .pdf-document {
+  --pdf-layout-scale: 1;
+}
+
+.pdf-export-source .pdf-document .schedule-brand {
+  gap: calc(0.6rem * var(--pdf-layout-scale));
+  margin-bottom: calc(7pt * var(--pdf-layout-scale));
+  padding-bottom: calc(5pt * var(--pdf-layout-scale));
+}
+
+.pdf-export-source .pdf-document .schedule-brand img {
+  width: calc(42pt * var(--pdf-layout-scale));
+  height: calc(42pt * var(--pdf-layout-scale));
+}
+
+.pdf-export-source .pdf-document .university-name {
+  font-size: calc(10.5pt * var(--pdf-layout-scale));
+}
+
+.pdf-export-source .pdf-document .document-name {
+  font-size: calc(7.5pt * var(--pdf-layout-scale));
+}
+
+.pdf-export-source .pdf-document .schedule-head {
+  margin-bottom: calc(6pt * var(--pdf-layout-scale));
+}
+
+.pdf-export-source .pdf-document .schedule-title-row {
+  margin-bottom: calc(3pt * var(--pdf-layout-scale));
+}
+
+.pdf-export-source .pdf-document .schedule-title-row h3 {
+  font-size: calc(12pt * var(--pdf-layout-scale));
+}
+
+.pdf-export-source .pdf-document .metadata {
+  gap: calc(2pt * var(--pdf-layout-scale)) calc(10pt * var(--pdf-layout-scale));
+  font-size: calc(7.5pt * var(--pdf-layout-scale));
+}
+
+.pdf-export-source .pdf-document .schedule-table {
+  font-size: calc(8pt * var(--pdf-layout-scale));
+  line-height: 1.2;
+}
+
+.pdf-export-source .pdf-document .schedule-table th,
+.pdf-export-source .pdf-document .schedule-table td {
+  padding: calc(5pt * var(--pdf-layout-scale)) calc(3pt * var(--pdf-layout-scale));
+}
+
+.pdf-export-source .pdf-document .schedule-table thead th {
+  font-size: calc(7.2pt * var(--pdf-layout-scale));
+}
+
+.pdf-export-source .pdf-document .adjust-input {
+  width: calc(34pt * var(--pdf-layout-scale));
+  min-height: 0;
+  padding: 0;
+  border: 0;
+}
+
+.pdf-export-source .pdf-document .schedule-footer {
+  gap: calc(1rem * var(--pdf-layout-scale));
+  margin-top: calc(9pt * var(--pdf-layout-scale));
+  padding: 0 calc(4pt * var(--pdf-layout-scale));
+  font-size: calc(7.5pt * var(--pdf-layout-scale));
+}
+
+.pdf-export-source .pdf-document .signatory {
+  min-width: 180px;
+}
+
+.pdf-export-source .pdf-document .signature-line {
+  height: calc(17pt * var(--pdf-layout-scale));
+}
+
+.pdf-export-source .pdf-document .signatory strong {
+  font-size: calc(7.2pt * var(--pdf-layout-scale));
+}
