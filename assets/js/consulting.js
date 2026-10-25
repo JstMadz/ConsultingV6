@@ -81,6 +81,17 @@ function nextWorking(d) {
   while (nonWorking(r)) r.setDate(r.getDate() + 1);
   return r;
 }
+function previousWorking(d) {
+  const r = new Date(d);
+  while (nonWorking(r)) r.setDate(r.getDate() - 1);
+  return r;
+}
+// RA 12009 IRR 51.5.1: clarifications at least 10 CD, bid bulletins at least 7 CD,
+// before the deadline. Derived from the deadline row, so saved activity indexes stay valid.
+const deadlineLinked = [
+  ["Last Day of Clarification from Bidders", 10],
+  ["Posting of Supplemental Bid Bulletin", 7],
+];
 function addWorking(d, n) {
   const r = new Date(d);
   for (let a = 0; a < n; ) {
@@ -188,9 +199,20 @@ function calculate(p) {
     return { a, i, d, extra };
   });
 }
+function withDeadlineLinked(rows) {
+  const deadline = rows.find((r) => r.i === 4);
+  const prebidAt = rows.findIndex((r) => r.i === 3);
+  if (!deadline || prebidAt < 0) return rows;
+  const linked = deadlineLinked.map(([name, days]) => ({
+    a: { name, min: days, max: days },
+    d: previousWorking(addCalendar(deadline.d, -days)),
+    derived: true,
+  }));
+  return [...rows.slice(0, prebidAt + 1), ...linked, ...rows.slice(prebidAt + 1)];
+}
 function renderCard(p) {
   const start = localDate(p.startDate),
-    rows = calculate(p),
+    rows = withDeadlineLinked(calculate(p)),
     last = rows.at(-1);
   return `<article class="project-schedule" data-id="${p.id}">
     <header class="schedule-brand">
@@ -218,7 +240,7 @@ function renderCard(p) {
     <div class="table-container" role="region" tabindex="0" aria-label="Schedule details. Scroll horizontally to view all columns.">
       <table class="schedule-table">
         <thead><tr><th>Procurement activity</th><th>Minimum days</th><th>Maximum days</th><th>Additional days</th><th>Scheduled date</th><th>Elapsed calendar days</th></tr></thead>
-        <tbody>${rows.map((r) => `<tr><td>${r.a.name}</td><td>${r.a.min}</td><td>${r.a.max}</td><td><input class="adjust-input" type="number" min="0" max="3650" step="1" value="${r.extra}" data-id="${p.id}" data-index="${r.i}" aria-label="Additional days for ${r.a.name}"><span class="row-error"></span></td><td>${formatDate(r.d)}</td><td>${between(start, r.d)}</td></tr>`).join("")}</tbody>
+        <tbody>${rows.map((r) => r.derived ? `<tr><td>${r.a.name}</td><td>${r.a.min}</td><td>${r.a.max}</td><td title="Counted back from the deadline (RA 12009 IRR 51.5.1).">—</td><td>${formatDate(r.d)}</td><td>${between(start, r.d)}</td></tr>` : `<tr><td>${r.a.name}</td><td>${r.a.min}</td><td>${r.a.max}</td><td><input class="adjust-input" type="number" min="0" max="3650" step="1" value="${r.extra}" data-id="${p.id}" data-index="${r.i}" aria-label="Additional days for ${r.a.name}"><span class="row-error"></span></td><td>${formatDate(r.d)}</td><td>${between(start, r.d)}</td></tr>`).join("")}</tbody>
         <tfoot><tr class="total-days-row"><th colspan="5">Total calendar days</th><td>${between(start, last.d).toLocaleString("en-PH")}</td></tr></tfoot>
       </table>
     </div>
