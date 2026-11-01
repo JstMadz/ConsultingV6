@@ -9,7 +9,8 @@ const activities = [
   ["Notification for Negotiation", 1, 3],
   ["Negotiation", 1, 10],
   ["Post-Qualification", 2, 30],
-  ["Approval of Resolution/Issuance of Notice of Award", 1, 15],
+  // RA 12009 IRR 66.2: the HoPE acts on the recommendation within 10 CD (15 under the 2016 IRR).
+  ["Approval of Resolution/Issuance of Notice of Award", 1, 10],
   ["Contract Preparation and Signing", 1, 10],
   ["Approval of Contract by Higher Authority", 1, 30],
   ["Issuance of Notice to Proceed", 1, 7],
@@ -210,6 +211,58 @@ function withDeadlineLinked(rows) {
   }));
   return [...rows.slice(0, prebidAt + 1), ...linked, ...rows.slice(prebidAt + 1)];
 }
+// RA 12009 IRR periods, checked on the computed dates (the same checks as the Bidding
+// Document Generator). A maximum period ending on a non-working day runs to the next
+// working day (IRR 67.3).
+function lateBy(from, to, days) {
+  return !!from && !!to && to > nextWorking(addCalendar(from, days));
+}
+function ra12009Notes(rows, budget) {
+  const at = (i) => rows.find((r) => r.i === i)?.d;
+  const named = (name) => rows.find((r) => r.derived && r.a.name === name)?.d;
+  const [posting, shortlist, prebid, deadline] = [1, 2, 3, 4].map(at);
+  const [evaluation, ranking, notice, negotiation, postQual, award, signing] = [5, 6, 7, 8, 9, 10, 11].map(at);
+  const clarification = named("Last Day of Clarification from Bidders");
+  const bulletin = named("Posting of Supplemental Bid Bulletin");
+  const notes = [];
+  if (shortlist && prebid && between(shortlist, prebid) < 7)
+    notes.push(["IRR 51.2", "The pre-bid conference must be at least 7 calendar days after the short-list is determined."]);
+  if (prebid && deadline && between(prebid, deadline) < 12)
+    notes.push(["IRR 51.2", "The pre-bid conference must be at least 12 calendar days before the bid deadline."]);
+  if (clarification && deadline && between(clarification, deadline) < 10)
+    notes.push(["IRR 51.5.1", "Requests for clarification must be in at least 10 calendar days before the bid deadline."]);
+  if (bulletin && deadline && between(bulletin, deadline) < 7)
+    notes.push(["IRR 51.5.1", "Bid bulletins must be issued at least 7 calendar days before the bid deadline."]);
+  // Posting runs 7 CD from the advertisement date (IRR 50.3.1); 53.1.4 and 54.5 count from its last day.
+  const lastPostingDay = posting && addCalendar(posting, 6);
+  if (lateBy(lastPostingDay, shortlist, 20))
+    notes.push(["IRR 53.1.4", "Eligibility checking and short-listing should take no more than 20 calendar days."]);
+  if (lateBy(lastPostingDay, deadline, 75))
+    notes.push(["IRR 54.5", "The bid deadline is more than 75 calendar days after the last day of posting."]);
+  if (lateBy(deadline, evaluation, 21))
+    notes.push(["IRR 62.4", "The evaluation must be done within 21 calendar days after the bid deadline."]);
+  if (lateBy(evaluation, ranking, 2))
+    notes.push(["IRR 62.2.1", "The HoPE acts on the ranking within 2 calendar days after receiving the evaluation."]);
+  if (lateBy(ranking, notice, 3))
+    notes.push(["IRR 62.2.1", "The consultant with the Highest Rated Bid is invited to negotiate within 3 calendar days."]);
+  if (lateBy(notice, negotiation, 10))
+    notes.push(["IRR 62.2.5", "Negotiations with one consultant should be completed within 10 calendar days."]);
+  if (lateBy(negotiation, postQual, 12))
+    notes.push(["IRR 63.8", "Post-qualification takes 12 calendar days from the end of negotiation (30 at most if extended)."]);
+  if (lateBy(postQual, award, 10))
+    notes.push(["IRR 66.2", "The HoPE approves the award within 10 calendar days from the BAC resolution."]);
+  if (lateBy(deadline, award, 60))
+    notes.push(["IRR 67.1", "From the opening of bids to the award must not exceed 60 calendar days."]);
+  if (lateBy(award, signing, 10))
+    notes.push(["IRR 66.5", "The contract is signed within 10 calendar days from receipt of the Notice of Award."]);
+  const info =
+    prebid && Number(budget) > 0 && Number(budget) < 3000000
+      ? '<p class="ra-info">IRR 51.1: the ABC is below PhP 3,000,000.00, so the pre-bid conference is at the BAC’s discretion.</p>'
+      : "";
+  return notes.length
+    ? `<div class="ra-notes"><strong>RA 12009 checks</strong><ul>${notes.map(([basis, text]) => `<li><b>${basis}:</b> ${text}</li>`).join("")}</ul>${info}</div>`
+    : `<div class="ra-notes ok">Every activity is within the RA 12009 IRR periods.${info}</div>`;
+}
 function renderCard(p) {
   const start = localDate(p.startDate),
     rows = withDeadlineLinked(calculate(p)),
@@ -219,7 +272,7 @@ function renderCard(p) {
       <img src="assets/images/tup-logo.png" alt="">
       <div>
         <p class="university-name">Technological University of the Philippines – Manila</p>
-        <p class="document-name">Consulting Services Procurement Schedule · 2016 Revised IRR of RA 9184</p>
+        <p class="document-name">Consulting Services Procurement Schedule · RA 12009 and its IRR</p>
       </div>
     </header>
     <div class="schedule-head">
@@ -244,6 +297,7 @@ function renderCard(p) {
         <tfoot><tr class="total-days-row"><th colspan="5">Total calendar days</th><td>${between(start, last.d).toLocaleString("en-PH")}</td></tr></tfoot>
       </table>
     </div>
+    ${ra12009Notes(rows, p.budget)}
     <footer class="schedule-footer">
       <div class="signatory"><p>Prepared by:</p><div class="signature-line"></div><strong>Signature over printed name</strong><span>Procurement Office</span></div>
       <div class="document-timestamps"><p>Created: ${formatDateTime(new Date(p.createdAt))}</p><p>Printed: <span class="print-time">${formatDateTime()}</span></p></div>
@@ -452,7 +506,8 @@ function renderProjects() {
           input.dataset.index
         ] = v;
         persist();
-        renderProjects();
+        // Re-render after the input's blur; replacing it mid-event throws NotFoundError.
+        window.setTimeout(renderProjects, 0);
       }),
   );
 }

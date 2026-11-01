@@ -2,7 +2,7 @@
 
 # 📅 Consulting Services Procurement Scheduler
 
-### Based on the 2016 Revised IRR of Republic Act No. 9184 (Annex "C")
+### Based on Republic Act No. 12009 (New Government Procurement Act) and its IRR
 
 A web-based procurement scheduling system for **Consulting Services** that automatically generates compliant procurement timelines while considering weekends, holidays, and procurement regulations. It is one of three procurement tools reachable from the project's landing page.
 
@@ -39,7 +39,7 @@ A web-based procurement scheduling system for **Consulting Services** that autom
 
 # Overview
 
-The **Consulting Services Procurement Scheduler** is a browser-based application designed to assist Procurement Management Offices (PMOs), Bids and Awards Committees (BACs), faculty researchers, and government agencies in preparing procurement schedules that comply with the **2016 Revised Implementing Rules and Regulations (IRR) of Republic Act No. 9184, Annex "C"**.
+The **Consulting Services Procurement Scheduler** is a browser-based application designed to assist Procurement Management Offices (PMOs), Bids and Awards Committees (BACs), faculty researchers, and government agencies in preparing procurement schedules that comply with **Republic Act No. 12009 (New Government Procurement Act) and its Implementing Rules and Regulations**.
 
 The system automates procurement scheduling, minimizes manual computation errors, skips weekends and holidays, validates mandatory procurement timelines, and generates professional printable reports.
 
@@ -53,7 +53,7 @@ The landing page (`index.html`) is the entry point for a small suite of TUP Mani
 
 | Tool | Description | Link |
 | --- | --- | --- |
-| **Consulting Services Procurement Scheduler** | This application — generates RA 9184/RA 12009-compliant schedules for consulting services. | [`consulting.html`](consulting.html) |
+| **Consulting Services Procurement Scheduler** | This application — generates RA 12009-compliant schedules for consulting services. | [`consulting.html`](consulting.html) |
 | **Goods, Services, and Infrastructure Scheduler** | A companion scheduler for goods, services, and infrastructure procurement. | [goodsscheduler.netlify.app](https://goodsscheduler.netlify.app/) |
 | **Project Procurement Management Plan (PPMP) Web Application** | A centralized platform for creating, managing, and consolidating Project Procurement Management Plans, ensuring consistency, accurate budget calculation, and standardized formatting across all implementing units. | [tupngpappmp.netlify.app](https://tupngpappmp.netlify.app/) |
 
@@ -350,8 +350,8 @@ No external libraries or build tooling required.
 
 This project was inspired by the procurement procedures prescribed under:
 
-- Republic Act No. 9184
-- 2016 Revised IRR of RA 9184
+- Republic Act No. 12009 (New Government Procurement Act) and its Implementing Rules and Regulations (GPPB, 2025)
+- Republic Act No. 9184 and its 2016 Revised IRR (superseded; the original source of the activity list)
 - Government Procurement Policy Board (GPPB)
 - Technological University of the Philippines – Manila
 
