@@ -12,8 +12,9 @@ const activities = [
   // RA 12009 IRR 66.2: the HoPE acts on the recommendation within 10 CD (15 under the 2016 IRR).
   ["Approval of Resolution/Issuance of Notice of Award", 1, 10],
   ["Contract Preparation and Signing", 1, 10],
-  ["Approval of Contract by Higher Authority", 1, 30],
-  ["Issuance of Notice to Proceed", 1, 7],
+  // RA 12009 Sec. 66: higher authority approves within 15 CD; the NTP follows within 3 CD.
+  ["Approval of Contract by Higher Authority", 1, 15],
+  ["Issuance of Notice to Proceed", 1, 3],
 ].map(([name, min, max]) => ({ name, min, max }));
 const $ = (id) => document.getElementById(id);
 let holidays = [],
@@ -221,7 +222,7 @@ function ra12009Notes(rows, budget) {
   const at = (i) => rows.find((r) => r.i === i)?.d;
   const named = (name) => rows.find((r) => r.derived && r.a.name === name)?.d;
   const [posting, shortlist, prebid, deadline] = [1, 2, 3, 4].map(at);
-  const [evaluation, ranking, notice, negotiation, postQual, award, signing] = [5, 6, 7, 8, 9, 10, 11].map(at);
+  const [evaluation, ranking, notice, negotiation, postQual, award, signing, approval, ntp] = [5, 6, 7, 8, 9, 10, 11, 12, 13].map(at);
   const clarification = named("Last Day of Clarification from Bidders");
   const bulletin = named("Posting of Supplemental Bid Bulletin");
   const notes = [];
@@ -255,6 +256,10 @@ function ra12009Notes(rows, budget) {
     notes.push(["IRR 67.1", "From the opening of bids to the award must not exceed 60 calendar days."]);
   if (lateBy(award, signing, 10))
     notes.push(["IRR 66.5", "The contract is signed within 10 calendar days from receipt of the Notice of Award."]);
+  if (lateBy(signing, approval, 15))
+    notes.push(["RA 12009 Sec. 66", "When higher approval is needed, the approving authority acts within 15 calendar days from receipt of the contract."]);
+  if (lateBy(approval, ntp, 3))
+    notes.push(["RA 12009 Sec. 66", "The Notice to Proceed is issued within 3 calendar days from the approval of the contract."]);
   const info =
     prebid && Number(budget) > 0 && Number(budget) < 3000000
       ? '<p class="ra-info">IRR 51.1: the ABC is below PhP 3,000,000.00, so the pre-bid conference is at the BAC’s discretion.</p>'
