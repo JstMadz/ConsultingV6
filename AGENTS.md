@@ -27,7 +27,7 @@ A browser-only scheduler for the TUP BAC's **Consulting Services** procurements 
 - `assets/js/visitor-counter.js`, `assets/css/consulting.css`, `assets/css/landing.css`.
 
 ## 6. Gotchas specific to this repo
-- **Saved projects store activity indexes** (`startActivity`, `adjustments`). Add new rows as derived rows (no "Additional days" input) so existing indexes stay valid.
+- **Saved projects store activity indexes** (`startActivity`, `adjustments`). Add a derived row (no "Additional days" input) when you can; a real new row needs a `version` bump and an `upgrade()` step that moves old indexes and keeps old dates (version 2, 2026-11-16, is the example).
 - Re-render the table after an input's blur, not during it (replacing the table inside blur threw `NotFoundError`).
 
 ## 7. Before you finish

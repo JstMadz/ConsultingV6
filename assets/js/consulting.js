@@ -1,7 +1,12 @@
 const activities = [
   ["Pre-Procurement Conference", 1, 1],
   ["Advertisement/Posting of Request for Expression of Interest", 7, 7],
+  // RA 12009 IRR 50.3.1: the REI is posted 7 CD; documents are due the day after.
+  ["Deadline of Submission and Opening of Short-listing Documents", 1, 1],
+  // IRR 53.1.4: eligibility checking and short-listing in 20 CD at most.
   ["Eligibility Check and Shortlisting", 1, 20],
+  // IRR 53.1.4: the BAC recommends the short-list to the HoPE; the date is tentative.
+  ["Approval of Short-list by the HOPE", 1, 20],
   ["Pre-Bid Conference", 1, 12],
   ["Deadline of Submission and Opening of Bids", 1, 75],
   ["Bid Evaluation", 1, 21],
@@ -184,26 +189,32 @@ function toggleHoliday(date) {
   renderProjects();
   status(wasSelected ? "Non-working date removed." : "Non-working date added.");
 }
+// Earliest date of an activity set by another (index: [from index, calendar days]):
+// IRR 50.3.1 short-listing documents after the 7 CD posting; IRR 51.2 pre-bid 7 CD after
+// the short-list is approved and 12 CD before the deadline. Same table as bidDocsGenerator.
+const floors = { 2: [1, 7], 5: [4, 7], 6: [5, 12] };
+// The HoPE's approvals: tentative until the HoPE acts (short-list, ranking, award).
+const hopeApprovals = [4, 8, 12];
 function calculate(p) {
   let current = localDate(p.startDate),
     computed = {};
   return activities.slice(p.startActivity).map((a, o) => {
     const i = p.startActivity + o,
-      extra = Number(p.adjustments[i] || 0);
-    let d = addWorking(current, a.min + extra);
-    if (i === 3 && computed[2])
-      d = new Date(Math.max(d, nextWorking(addCalendar(computed[2], 7))));
-    if (i === 4 && computed[3])
-      d = new Date(Math.max(d, nextWorking(addCalendar(computed[3], 12))));
-    d = nextWorking(d);
+      // The starting activity falls on the start date; the rest count on from it.
+      extra = o === 0 ? 0 : Number(p.adjustments[i] || 0);
+    let d = o === 0 ? new Date(current) : addWorking(current, a.min);
+    const f = floors[i];
+    if (o > 0 && f && computed[f[0]])
+      d = new Date(Math.max(d, nextWorking(addCalendar(computed[f[0]], f[1]))));
+    d = nextWorking(addWorking(d, extra));
     computed[i] = d;
     current = new Date(d);
     return { a, i, d, extra };
   });
 }
 function withDeadlineLinked(rows) {
-  const deadline = rows.find((r) => r.i === 4);
-  const prebidAt = rows.findIndex((r) => r.i === 3);
+  const deadline = rows.find((r) => r.i === 6);
+  const prebidAt = rows.findIndex((r) => r.i === 5);
   if (!deadline || prebidAt < 0) return rows;
   const linked = deadlineLinked.map(([name, days]) => ({
     a: { name, min: days, max: days },
@@ -221,13 +232,15 @@ function lateBy(from, to, days) {
 function ra12009Notes(rows, budget) {
   const at = (i) => rows.find((r) => r.i === i)?.d;
   const named = (name) => rows.find((r) => r.derived && r.a.name === name)?.d;
-  const [posting, shortlist, prebid, deadline] = [1, 2, 3, 4].map(at);
-  const [evaluation, ranking, notice, negotiation, postQual, award, signing, approval, ntp] = [5, 6, 7, 8, 9, 10, 11, 12, 13].map(at);
+  const [posting, docsDeadline, shortlist, shortlistApproval, prebid, deadline] = [1, 2, 3, 4, 5, 6].map(at);
+  const [evaluation, ranking, notice, negotiation, postQual, award, signing, approval, ntp] = [7, 8, 9, 10, 11, 12, 13, 14, 15].map(at);
   const clarification = named("Last Day of Clarification from Bidders");
   const bulletin = named("Posting of Supplemental Bid Bulletin");
   const notes = [];
-  if (shortlist && prebid && between(shortlist, prebid) < 7)
-    notes.push(["IRR 51.2", "The pre-bid conference must be at least 7 calendar days after the short-list is determined."]);
+  if (posting && docsDeadline && between(posting, docsDeadline) < 7)
+    notes.push(["IRR 50.3.1", "The deadline for short-listing documents falls within the 7 calendar days the REI is posted."]);
+  if (shortlistApproval && prebid && between(shortlistApproval, prebid) < 7)
+    notes.push(["IRR 51.2", "The pre-bid conference must be at least 7 calendar days after the short-list is approved."]);
   if (prebid && deadline && between(prebid, deadline) < 12)
     notes.push(["IRR 51.2", "The pre-bid conference must be at least 12 calendar days before the bid deadline."]);
   if (clarification && deadline && between(clarification, deadline) < 10)
@@ -236,7 +249,7 @@ function ra12009Notes(rows, budget) {
     notes.push(["IRR 51.5.1", "Bid bulletins must be issued at least 7 calendar days before the bid deadline."]);
   // Posting runs 7 CD from the advertisement date (IRR 50.3.1); 53.1.4 and 54.5 count from its last day.
   const lastPostingDay = posting && addCalendar(posting, 6);
-  if (lateBy(lastPostingDay, shortlist, 20))
+  if (lateBy(docsDeadline, shortlist, 20))
     notes.push(["IRR 53.1.4", "Eligibility checking and short-listing should take no more than 20 calendar days."]);
   if (lateBy(lastPostingDay, deadline, 75))
     notes.push(["IRR 54.5", "The bid deadline is more than 75 calendar days after the last day of posting."]);
@@ -298,7 +311,7 @@ function renderCard(p) {
     <div class="table-container" role="region" tabindex="0" aria-label="Schedule details. Scroll horizontally to view all columns.">
       <table class="schedule-table">
         <thead><tr><th>Procurement activity</th><th>Minimum days</th><th>Maximum days</th><th>Additional days</th><th>Scheduled date</th><th>Elapsed calendar days</th></tr></thead>
-        <tbody>${rows.map((r) => r.derived ? `<tr><td>${r.a.name}</td><td>${r.a.min}</td><td>${r.a.max}</td><td title="Counted back from the deadline (RA 12009 IRR 51.5.1).">—</td><td>${formatDate(r.d)}</td><td>${between(start, r.d)}</td></tr>` : `<tr><td>${r.a.name}</td><td>${r.a.min}</td><td>${r.a.max}</td><td><input class="adjust-input" type="number" min="0" max="3650" step="1" value="${r.extra}" data-id="${p.id}" data-index="${r.i}" aria-label="Additional days for ${r.a.name}"><span class="row-error"></span></td><td>${formatDate(r.d)}</td><td>${between(start, r.d)}</td></tr>`).join("")}</tbody>
+        <tbody>${rows.map((r) => r.derived ? `<tr><td>${r.a.name}</td><td>${r.a.min}</td><td>${r.a.max}</td><td title="Counted back from the deadline (RA 12009 IRR 51.5.1).">—</td><td>${formatDate(r.d)}</td><td>${between(start, r.d)}</td></tr>` : `<tr><td>${r.a.name}${hopeApprovals.includes(r.i) && r.i !== p.startActivity ? ' <em class="tentative">(tentative: awaits the HoPE)</em>' : ""}</td><td>${r.a.min}</td><td>${r.a.max}</td><td><input class="adjust-input" type="number" min="0" max="3650" step="1" value="${r.extra}" ${r.i === p.startActivity ? 'disabled title="The start date of the schedule."' : ""} data-id="${p.id}" data-index="${r.i}" aria-label="Additional days for ${r.a.name}"><span class="row-error"></span></td><td>${formatDate(r.d)}</td><td>${between(start, r.d)}</td></tr>`).join("")}</tbody>
         <tfoot><tr class="total-days-row"><th colspan="5">Total calendar days</th><td>${between(start, last.d).toLocaleString("en-PH")}</td></tr></tfoot>
       </table>
     </div>
@@ -535,6 +548,7 @@ function addProject(e) {
     startTime: $("startTime").value,
     endTime: $("endTime").value,
     adjustments: existing?.adjustments || {},
+    version: 2,
     createdAt: existing?.createdAt || new Date().toISOString(),
   };
   const wasEditing = Boolean(editingProjectId);
@@ -576,6 +590,20 @@ function resetProjectEdit() {
   $("generateBtn").textContent = "Add project schedule";
   $("cancelEditBtn").hidden = true;
 }
+// Version 2 (2026-11-16) added rows 2 (short-listing documents deadline) and 4 (HoPE
+// approval of the short-list), and the starting activity now falls on the start date.
+// Older saved projects move to the new indexes and keep their dates.
+const v1Index = (i) => (i < 2 ? i : i === 2 ? 3 : i + 2);
+function upgrade(p) {
+  if (p.version >= 2) return p;
+  const adjustments = Object.fromEntries(
+    Object.entries(p.adjustments).map(([i, v]) => [String(v1Index(Number(i))), v]),
+  );
+  const startActivity = v1Index(p.startActivity);
+  const firstExtra = Number(p.adjustments[p.startActivity] || 0);
+  const first = nextWorking(addWorking(localDate(p.startDate), activities[startActivity].min + firstExtra));
+  return { ...p, adjustments, startActivity, startDate: isoDate(first), version: 2 };
+}
 function restore() {
   $("startActivity").innerHTML = activities
     .map((a, i) => `<option value="${i}">${a.name}</option>`)
@@ -597,12 +625,14 @@ function restore() {
             p.startActivity >= 0 &&
             p.startActivity < activities.length,
         )
-        .map((p) => ({
-          ...p,
-          startTime: p.startTime || "",
-          endTime: p.endTime || "",
-          adjustments: p.adjustments || {},
-        }));
+        .map((p) =>
+          upgrade({
+            ...p,
+            startTime: p.startTime || "",
+            endTime: p.endTime || "",
+            adjustments: p.adjustments || {},
+          }),
+        );
   } catch {
     localStorage.removeItem("consultingProjects");
   }
