@@ -195,7 +195,33 @@ function toggleHoliday(date) {
 const floors = { 2: [1, 7], 5: [4, 7], 6: [5, 12] };
 // The HoPE's approvals: tentative until the HoPE acts (short-list, ranking, award).
 const hopeApprovals = [4, 8, 12];
-function calculate(p) {
+// RA 12009 maximum periods between activities, by index: [from, to, calendar days, basis,
+// days after "from" the period starts]. Calendar days include weekends and holidays; a last
+// day that is a day off moves to the next working day (IRR 67.3). The schedule is held to
+// them, and additional days stop at them. IRR 63.8: 12 CD, which the HoPE may extend to 30.
+const MAX_PERIODS = [
+  [2, 3, 20, "IRR 53.1.4"],
+  [1, 6, 75, "IRR 54.5", 6],
+  [6, 7, 21, "IRR 62.4"],
+  [7, 8, 2, "IRR 62.2.1"],
+  [8, 9, 3, "IRR 62.2.1"],
+  [9, 10, 10, "IRR 62.2.5"],
+  [10, 11, 30, "IRR 63.8"],
+  [11, 12, 10, "IRR 66.2"],
+  [6, 12, 60, "IRR 67.1"],
+  [12, 13, 10, "IRR 66.5"],
+  [13, 14, 15, "RA 12009 Sec. 66"],
+  [14, 15, 3, "RA 12009 Sec. 66"],
+];
+const POST_QUALIFICATION_DAYS = 12;
+const lastAllowed = (from, [, , days, , offset = 0]) => nextWorking(addCalendar(from, offset + days));
+// The date held to the last day of every maximum ending at activity `i`.
+function held(i, d, computed) {
+  return MAX_PERIODS.filter(([from, to]) => to === i && computed[from])
+    .map((rule) => lastAllowed(computed[rule[0]], rule))
+    .reduce((out, last) => (last < out ? last : out), d);
+}
+function calculate(p, hold = true) {
   let current = localDate(p.startDate),
     computed = {};
   return activities.slice(p.startActivity).map((a, o) => {
@@ -207,10 +233,36 @@ function calculate(p) {
     if (o > 0 && f && computed[f[0]])
       d = new Date(Math.max(d, nextWorking(addCalendar(computed[f[0]], f[1]))));
     d = nextWorking(addWorking(d, extra));
+    if (o > 0 && hold) d = held(i, d, computed);
     computed[i] = d;
     current = new Date(d);
     return { a, i, d, extra };
   });
+}
+// The most additional days activity `i` can take before a maximum running through it is
+// passed (counted on dates not held to the maximums), and that maximum; null when none
+// limits it.
+function extraLimit(p, i) {
+  if (!MAX_PERIODS.some(([from, to]) => from < i && i <= to)) return null;
+  const passed = (extra) => {
+    const d = {};
+    calculate({ ...p, adjustments: { ...p.adjustments, [i]: extra } }, false).forEach((r) => (d[r.i] = r.d));
+    return MAX_PERIODS.find((rule) => rule[0] < i && i <= rule[1] && d[rule[0]] && d[rule[1]] > lastAllowed(d[rule[0]], rule));
+  };
+  for (let extra = 0; extra <= 3650; extra++) {
+    const rule = passed(extra + 1);
+    if (rule) return { max: extra, rule };
+  }
+  return null;
+}
+// The additional-days cell: it stops at the legal maximum, and says so there.
+function adjustCell(p, r) {
+  if (r.i === p.startActivity)
+    return `<input class="adjust-input" type="number" min="0" max="3650" step="1" value="${r.extra}" disabled title="The start date of the schedule." data-id="${p.id}" data-index="${r.i}" aria-label="Additional days for ${r.a.name}"><span class="row-error"></span>`;
+  const limit = extraLimit(p, r.i);
+  const max = limit ? limit.max : 3650;
+  const note = limit ? `At the legal maximum: ${limit.rule[2]} CD (${limit.rule[3]})` : "";
+  return `<input class="adjust-input" type="number" min="0" max="${max}" step="1" value="${r.extra}" data-id="${p.id}" data-index="${r.i}" data-max="${max}" data-limit="${note}" aria-label="Additional days for ${r.a.name}"><span class="row-error row-limit">${limit && r.extra >= max ? note : ""}</span>`;
 }
 function withDeadlineLinked(rows) {
   const deadline = rows.find((r) => r.i === 6);
@@ -261,8 +313,8 @@ function ra12009Notes(rows, budget) {
     notes.push(["IRR 62.2.1", "The consultant with the Highest Rated Bid is invited to negotiate within 3 calendar days."]);
   if (lateBy(notice, negotiation, 10))
     notes.push(["IRR 62.2.5", "Negotiations with one consultant should be completed within 10 calendar days."]);
-  if (lateBy(negotiation, postQual, 12))
-    notes.push(["IRR 63.8", "Post-qualification takes 12 calendar days from the end of negotiation (30 at most if extended)."]);
+  if (lateBy(negotiation, postQual, 30))
+    notes.push(["IRR 63.8", "Post-qualification may not exceed 30 calendar days in all from the end of negotiation, even when the HoPE extends it."]);
   if (lateBy(postQual, award, 10))
     notes.push(["IRR 66.2", "The HoPE approves the award within 10 calendar days from the BAC resolution."]);
   if (lateBy(deadline, award, 60))
@@ -273,10 +325,12 @@ function ra12009Notes(rows, budget) {
     notes.push(["RA 12009 Sec. 66", "When higher approval is needed, the approving authority acts within 15 calendar days from receipt of the contract."]);
   if (lateBy(approval, ntp, 3))
     notes.push(["RA 12009 Sec. 66", "The Notice to Proceed is issued within 3 calendar days from the approval of the contract."]);
+  const extended = negotiation && postQual && !lateBy(negotiation, postQual, 30) && between(negotiation, postQual) > POST_QUALIFICATION_DAYS;
   const info =
-    prebid && Number(budget) > 0 && Number(budget) < 3000000
+    (prebid && Number(budget) > 0 && Number(budget) < 3000000
       ? '<p class="ra-info">IRR 51.1: the ABC is below PhP 3,000,000.00, so the pre-bid conference is at the BAC’s discretion.</p>'
-      : "";
+      : "") +
+    (extended ? "<p class=\"ra-info\">IRR 63.8: past 12 CD of post-qualification, so it needs the HoPE's extension (up to 30 CD).</p>" : "");
   return notes.length
     ? `<div class="ra-notes"><strong>RA 12009 checks</strong><ul>${notes.map(([basis, text]) => `<li><b>${basis}:</b> ${text}</li>`).join("")}</ul>${info}</div>`
     : `<div class="ra-notes ok">Every activity is within the RA 12009 IRR periods.${info}</div>`;
@@ -311,7 +365,7 @@ function renderCard(p) {
     <div class="table-container" role="region" tabindex="0" aria-label="Schedule details. Scroll horizontally to view all columns.">
       <table class="schedule-table">
         <thead><tr><th>Procurement activity</th><th>Minimum days</th><th>Maximum days</th><th>Additional days</th><th>Scheduled date</th><th>Elapsed calendar days</th></tr></thead>
-        <tbody>${rows.map((r) => r.derived ? `<tr><td>${r.a.name}</td><td>${r.a.min}</td><td>${r.a.max}</td><td title="Counted back from the deadline (RA 12009 IRR 51.5.1).">—</td><td>${formatDate(r.d)}</td><td>${between(start, r.d)}</td></tr>` : `<tr><td>${r.a.name}${hopeApprovals.includes(r.i) && r.i !== p.startActivity ? ' <em class="tentative">(tentative: awaits the HoPE)</em>' : ""}</td><td>${r.a.min}</td><td>${r.a.max}</td><td><input class="adjust-input" type="number" min="0" max="3650" step="1" value="${r.extra}" ${r.i === p.startActivity ? 'disabled title="The start date of the schedule."' : ""} data-id="${p.id}" data-index="${r.i}" aria-label="Additional days for ${r.a.name}"><span class="row-error"></span></td><td>${formatDate(r.d)}</td><td>${between(start, r.d)}</td></tr>`).join("")}</tbody>
+        <tbody>${rows.map((r) => r.derived ? `<tr><td>${r.a.name}</td><td>${r.a.min}</td><td>${r.a.max}</td><td title="Counted back from the deadline (RA 12009 IRR 51.5.1).">—</td><td>${formatDate(r.d)}</td><td>${between(start, r.d)}</td></tr>` : `<tr><td>${r.a.name}${hopeApprovals.includes(r.i) && r.i !== p.startActivity ? ' <em class="tentative">(tentative: awaits the HoPE)</em>' : ""}</td><td>${r.a.min}</td><td>${r.a.max}</td><td>${adjustCell(p, r)}</td><td>${formatDate(r.d)}</td><td>${between(start, r.d)}</td></tr>`).join("")}</tbody>
         <tfoot><tr class="total-days-row"><th colspan="5">Total calendar days</th><td>${between(start, last.d).toLocaleString("en-PH")}</td></tr></tfoot>
       </table>
     </div>
@@ -515,9 +569,13 @@ function renderProjects() {
       (input.onchange = () => {
         const v = Number(input.value),
           err = input.nextElementSibling;
-        if (!Number.isInteger(v) || v < 0 || v > 3650) {
+        const max = Number(input.dataset.max ?? 3650);
+        if (!Number.isInteger(v) || v < 0 || v > max) {
           input.setAttribute("aria-invalid", "true");
-          err.textContent = "Use a whole number from 0 to 3,650.";
+          err.textContent =
+            v > max && input.dataset.limit
+              ? `${input.dataset.limit}, so at most ${max} additional day${max === 1 ? "" : "s"}.`
+              : `Use a whole number from 0 to ${max.toLocaleString("en-PH")}.`;
           return;
         }
         projects.find((p) => p.id === input.dataset.id).adjustments[

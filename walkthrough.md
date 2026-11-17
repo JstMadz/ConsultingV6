@@ -1,5 +1,21 @@
 # Walkthrough
 
+## 2026-11-17 — The schedule stops at each RA 12009 maximum (branch `ra12009-fixes`)
+
+- **Owner's direction:** the scheduler is dynamic up to each legal maximum and strict at it. Periods count calendar days, weekends and holidays included. When a maximum is reached, the additional days stop, with a short note citing the section. IRR 63.8: post-qualification takes 12 CD, and the HoPE may extend it to 30 CD in all for Consulting Services.
+- **Root cause:** additional days went up to 3,650, and a broken period only showed in the RA 12009 checks. IRR 63.8 was checked at 12 CD.
+- **Fix:**
+  - `MAX_PERIODS`: one table of the maximums by activity index (53.1.4, 54.5, 62.4, 62.2.1, 62.2.5, 63.8, 66.2, 67.1, 66.5, Sec. 66), with `lastAllowed` (IRR 67.3).
+  - `calculate` holds each computed date to it.
+  - `extraLimit` / `adjustCell` give each row its most additional days. A larger number is refused ("At the legal maximum: 10 CD (IRR 66.5), so at most 7 additional days."), and the row shows the note at the limit.
+  - IRR 63.8 warns past 30 CD, and an information line says past 12 CD needs the HoPE's extension.
+- Same rules and dates as the Bidding Document Generator (1d1b4a3).
+- **Verified headless in Chromium:**
+  - 1,830 schedules (every 2026 start date × 5 sets of additional days, with the TUP non-working dates) give the same dates as the Bidding Document Generator, with 0 differences;
+  - a saved project with 20 more days of post-qualification is held at 30 CD, with the limit and the HoPE-extension notes;
+  - 30 typed days on Contract Signing are refused.
+  - No page errors.
+
 ## 2026-11-16 — Short-listing deadline and HoPE approval rows; start activity on its own date
 
 - **Owner's report (via bidDocsGenerator):** the schedule put "Eligibility Check and Shortlisting" one working day after the REI posting date, inside the 7 calendar days of posting (RA 12009 IRR 50.3.1), so the REI's deadline and the schedule disagreed. The owner also explained that the HoPE's approvals (short-list, ranking, award) have no known date: the schedule after them is tentative, and staff continue it from the approval once the HoPE acts.
