@@ -191,7 +191,7 @@ function toggleHoliday(date) {
 }
 // Earliest date of an activity set by another (index: [from index, calendar days]):
 // IRR 50.3.1 short-listing documents after the 7 CD posting; IRR 51.2 pre-bid 7 CD after
-// the short-list is approved and 12 CD before the deadline. Same table as bidDocsGenerator.
+// the short-list is approved and 12 CD before the deadline. Same table as bidDocsBuilder.
 const floors = { 2: [1, 7], 5: [4, 7], 6: [5, 12] };
 // The HoPE's approvals: tentative until the HoPE acts (short-list, ranking, award).
 const hopeApprovals = [4, 8, 12];

@@ -17,7 +17,7 @@ A browser-only scheduler for the TUP BAC's **Consulting Services** procurements 
 - Working branch: **`ra12009-fixes`** (not `main`).
 
 ## 4. Domain rules (non-negotiable)
-1. **Same fix, three apps:** this scheduler, GoodsAndServicesV6 and the scheduler built into bidDocsGenerator (`src/lib/schedule/`). A rule fix here is made there too.
+1. **Same fix, three apps:** this scheduler, GoodsAndServicesV6 and the scheduler built into bidDocsBuilder (`src/lib/schedule/`). A rule fix here is made there too.
 2. Durations follow the GPPB copy of the RA 12009 IRR: short-listing 20 CD (53.1.4), deadline ≤ 75 CD after the last REOI posting day (54.5), evaluation 21 CD (62.4), ranking approval 2 CD and notice 3 CD (62.2.1), negotiation 10 CD (62.2.5), post-qualification 12 CD up to 30 (63.8), award ≤ 10 CD of the resolution (66.2), signing 10 CD (66.5). Cite the IRR section in the commit.
 3. Clarification (10 CD) and bid bulletin (7 CD) are counted back from the bid deadline to the previous working day (51.5.1).
 4. The IRR-break list under each schedule is **screen only**: hidden in print.
@@ -32,5 +32,5 @@ A browser-only scheduler for the TUP BAC's **Consulting Services** procurements 
 
 ## 7. Before you finish
 - [ ] Dates checked before/after in Chrome; print checked
-- [ ] Same rule change made in GoodsAndServicesV6 (if it applies) and bidDocsGenerator
+- [ ] Same rule change made in GoodsAndServicesV6 (if it applies) and bidDocsBuilder
 - [ ] `walkthrough.md` updated; commit on `ra12009-fixes` citing the IRR section
